@@ -631,7 +631,14 @@ async function deleteProj(id){
   if(!p) return;
   if(!confirm(`«${p.name}» حذف شود؟\n\n(فایل از GitHub هم پاک می‌شود)`)) return;
   
-  setStatus("load", '<div class="spin"></div><div style="flex:1">در حال حذف از GitHub...</div>');
+  // نمایش وضعیت در صفحه فعلی
+  const tab = document.querySelector(".tab.active").dataset.tab;
+  if(tab === "new"){
+    setStatus("load", '<div class="spin"></div><div style="flex:1">در حال حذف از GitHub...</div>');
+  } else {
+    toast("در حال حذف...", "warn");
+  }
+  
   try{
     // برای حذف فایل، نیاز به SHA داریم
     const fileInfo = await gh(`/repos/${OWNER}/${REPO}/contents/sites/${id}/index.html`);
@@ -642,15 +649,24 @@ async function deleteProj(id){
     projs = projs.filter(x=>x.id!==id);
     saveProjs();
     renderList();
-    $("status").style.display = "none";
-    $("result").style.display = "none";
-    toast("پروژه حذف شد ✓");
+    if(tab === "new"){
+      $("status").style.display = "none";
+      $("result").style.display = "none";
+    }
+    toast("✅ از GitHub و لیست حذف شد");
   }catch(e){
-    // اگه فایل قبلاً پاک شده، فقط از لیست حذف کن
-    projs = projs.filter(x=>x.id!==id);
-    saveProjs();
-    renderList();
-    $("status").style.display = "none";
+    // اگه فایل قبلاً پاک شده (404) فقط از لیست حذف کن
+    if(e.message.includes("404") || e.message.includes("Not Found")){
+      projs = projs.filter(x=>x.id!==id);
+      saveProjs();
+      renderList();
+      if(tab === "new") $("status").style.display = "none";
+      toast("از لیست حذف شد (فایل از قبل نبود)");
+    } else {
+      // خطای واقعی — از لیست هم حذف نکن
+      if(tab === "new") $("status").style.display = "none";
+      toast("❌ خطا: " + e.message, "err");
+    }
     toast("از لیست حذف شد (فایل از قبل نبود)");
   }
 }
