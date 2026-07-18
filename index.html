@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دیپلوی من | Deploy Manager</title>
+<meta name="theme-color" content="#06b6d4">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg-0:#04080a;--bg-1:#081418;--bg-2:#0d1f24;
+  --c1:#06b6d4;--c2:#3b82f6;--c3:#10b981;--c4:#8b5cf6;
+  --text:#f0f9ff;--dim:#94a3b8;--faint:#64748b;
+  --border:rgba(6,182,212,.18);--border-2:rgba(6,182,212,.35);
+  --glass:rgba(255,255,255,.04);--glass-2:rgba(255,255,255,.07);
+  --success:#10b981;--danger:#ef4444;--warn:#f59e0b;
+  --r-sm:10px;--r-md:16px;--r-lg:22px;--r-xl:28px;
+}
+html,body{min-height:100%}
+body{
+  font-family:'Vazirmatn','Segoe UI',Tahoma,sans-serif;
+  background:var(--bg-0);color:var(--text);
+  min-height:100vh;padding:20px;
+  position:relative;overflow-x:hidden;
+}
+
+/* === پس‌زمینه === */
+.bg{
+  position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 30%,rgba(6,182,212,.25),transparent 50%),
+    radial-gradient(ellipse 70% 50% at 80% 70%,rgba(59,130,246,.20),transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%,rgba(139,92,246,.15),transparent 50%),
+    linear-gradient(135deg,#04080a 0%,#081418 50%,#0d1f24 100%);
+}
+.bg-grid{
+  position:fixed;inset:0;z-index:-1;
+  background-image:
+    linear-gradient(rgba(6,182,212,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(6,182,212,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%);
+  -webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%);
+}
+
+/* === Layout === */
+.container{max-width:780px;margin:0 auto}
+
+/* === Header === */
+.header{text-align:center;margin-bottom:30px;padding-top:10px}
+.logo{
+  width:64px;height:64px;margin:0 auto 14px;
+  background:linear-gradient(135deg,var(--c1),var(--c2) 50%,var(--c4));
+  border-radius:18px;display:grid;place-items:center;
+  font-size:30px;color:#fff;
+  box-shadow:0 10px 30px rgba(6,182,212,.4),inset 0 1px 0 rgba(255,255,255,.1);
+  position:relative;overflow:hidden;
+}
+.logo::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);animation:shine 4s linear infinite}
+@keyframes shine{0%{transform:translateX(-100%) translateY(-100%)}100%{transform:translateX(100%) translateY(100%)}}
+h1{font-size:28px;font-weight:900;margin-bottom:4px;background:linear-gradient(135deg,var(--c1),var(--c4));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.5px}
+.subtitle{color:var(--dim);font-size:13px}
+
+/* === Tabs === */
+.tabs{display:flex;gap:4px;background:rgba(0,0,0,.4);padding:4px;border-radius:var(--r-md);margin-bottom:20px;border:1px solid var(--border)}
+.tab{
+  flex:1;padding:11px;border:none;background:none;
+  color:var(--dim);font-size:13px;font-weight:700;
+  border-radius:11px;cursor:pointer;transition:all .25s;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.tab.active{background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;box-shadow:0 4px 12px rgba(6,182,212,.3)}
+.tab svg{width:15px;height:15px}
+
+/* === Card === */
+.card{
+  background:linear-gradient(135deg,var(--glass),var(--glass-2));
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:24px;margin-bottom:16px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  position:relative;overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,.4);
+}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border-2),transparent)}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.card-h svg{width:18px;height:18px;color:var(--c1)}
+.card-h h3{font-size:15px;font-weight:700;flex:1}
+.card-h .pill{font-size:10px;padding:3px 9px;border-radius:12px;background:var(--glass-2);color:var(--c1);font-weight:700}
+
+/* === Token Bar === */
+.tb{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;background:rgba(0,0,0,.3);
+  border:1px solid var(--border);border-radius:var(--r-md);
+  font-size:12.5px;margin-bottom:16px;cursor:pointer;transition:all .25s;
+}
+.tb:hover{border-color:var(--border-2)}
+.tb-dot{width:10px;height:10px;border-radius:50%;background:var(--faint);flex-shrink:0}
+.tb.ok .tb-dot{background:var(--success);box-shadow:0 0 10px var(--success)}
+.tb.err .tb-dot{background:var(--danger);box-shadow:0 0 10px var(--danger)}
+.tb-info{flex:1;min-width:0;overflow:hidden}
+.tb-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-meta{font-size:11px;color:var(--faint)}
+.tb-btn{background:var(--glass);border:1px solid var(--border);color:var(--dim);padding:6px 12px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .25s;font-family:inherit}
+.tb-btn:hover{background:var(--glass-2);color:var(--text);border-color:var(--border-2)}
+
+/* === Editor === */
+.ew{position:relative;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--border);background:rgba(0,0,0,.4);transition:all .25s}
+.ew:focus-within{border-color:var(--border-2);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.eb{display:flex;align-items:center;padding:9px 14px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);gap:8px}
+.dots{display:flex;gap:5px}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.fn{font-size:11px;color:var(--faint);font-family:monospace;margin-right:8px}
+.eb-s{flex:1}
+textarea{
+  width:100%;min-height:260px;background:transparent;color:var(--text);
+  border:none;outline:none;padding:16px;
+  font-family:'Courier New','Vazirmatn',monospace;
+  font-size:13.5px;line-height:1.7;resize:vertical;
+  direction:ltr;text-align:left;
+}
+textarea::placeholder{color:var(--faint);opacity:.6}
+
+.inp{
+  width:100%;padding:12px 14px;
+  background:rgba(0,0,0,.5);border:1.5px solid var(--border);
+  border-radius:11px;color:var(--text);font-size:13px;
+  font-family:monospace;outline:none;transition:all .25s;
+  direction:ltr;text-align:left;
+}
+.inp:focus{border-color:var(--c1);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.inp::placeholder{color:var(--faint)}
+.lbl{display:block;font-size:11.5px;font-weight:700;color:var(--dim);margin-bottom:6px}
+
+/* === دکمه === */
+.btn{
+  width:100%;padding:14px;margin-top:14px;
+  background:linear-gradient(135deg,var(--c1),var(--c2));
+  color:#fff;border:none;border-radius:var(--r-md);
+  font-size:14px;font-weight:700;cursor:pointer;
+  font-family:inherit;position:relative;overflow:hidden;
+  transition:all .25s;box-shadow:0 6px 20px rgba(6,182,212,.35);
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(6,182,212,.5)}
+.btn:active:not(:disabled){transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);transform:translateX(-100%);transition:transform .6s}
+.btn:hover::after{transform:translateX(100%)}
+.btn svg{width:16px;height:16px;flex-shrink:0}
+
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn-row .btn{margin-top:0;flex:1;min-width:120px}
+.bs{padding:10px 14px;background:var(--glass);color:var(--text);border:1px solid var(--border);box-shadow:none;font-size:12.5px}
+.bs:hover{background:var(--glass-2);border-color:var(--border-2);transform:translateY(0)}
+.bd{padding:10px 14px;background:linear-gradient(135deg,var(--danger),#dc2626);color:#fff;font-size:12.5px;box-shadow:0 4px 12px rgba(239,68,68,.3)}
+.bd:hover{box-shadow:0 6px 18px rgba(239,68,68,.5)}
+
+/* === Status === */
+.status{
+  margin-top:14px;padding:12px 14px;border-radius:var(--r-md);
+  font-size:13px;display:flex;align-items:flex-start;gap:10px;
+  line-height:1.7;animation:slideIn .3s;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.st-load{background:rgba(6,182,212,.1);color:var(--c1);border:1px solid rgba(6,182,212,.25)}
+.st-err{background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
+.st-ok{background:rgba(16,185,129,.1);color:#6ee7b7;border:1px solid rgba(16,185,129,.25)}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0;margin-top:2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.prog{width:100%;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:8px}
+.prog-b{height:100%;background:linear-gradient(90deg,var(--c1),var(--c2));border-radius:2px;transition:width .3s;box-shadow:0 0 6px var(--c1)}
+
+/* === Result === */
+.res{
+  margin-top:16px;padding:16px;
+  background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.02));
+  border:1px solid rgba(16,185,129,.25);border-radius:var(--r-md);
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{0%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
+.res-l{color:#6ee7b7;font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.lbox{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(0,0,0,.4);border:1px solid var(--border);
+  border-radius:10px;padding:4px;
+}
+.lbox input{
+  flex:1;padding:8px 10px;background:none;border:none;outline:none;
+  color:var(--c1);font-family:monospace;font-size:12px;
+  direction:ltr;text-align:left;
+}
+.bico{
+  width:32px;height:32px;border-radius:7px;border:none;
+  background:rgba(255,255,255,.06);color:var(--text);
+  cursor:pointer;display:grid;place-items:center;
+  transition:all .25s;flex-shrink:0;
+}
+.bico:hover{background:rgba(255,255,255,.12)}
+.bico.ok{background:var(--success);color:#022c22}
+.bico svg{width:13px;height:13px}
+
+/* === لیست پروژه‌ها === */
+.plist{display:flex;flex-direction:column;gap:8px}
+.pitem{
+  display:flex;align-items:center;gap:10px;
+  padding:12px;background:rgba(0,0,0,.3);
+  border:1px solid var(--border);border-radius:var(--r-md);
+  transition:all .25s;
+}
+.pitem:hover{background:rgba(0,0,0,.4);border-color:var(--border-2)}
+.p-thumb{
+  width:42px;height:42px;border-radius:10px;
+  background:linear-gradient(135deg,var(--c1),var(--c2));
+  display:grid;place-items:center;font-size:18px;color:#fff;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(6,182,212,.3);
+}
+.p-info{flex:1;min-width:0;overflow:hidden}
+.p-name{font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-url{font-size:10.5px;color:var(--faint);font-family:monospace;direction:ltr;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-size{font-size:10px;color:var(--faint);margin-top:2px}
+.p-acts{display:flex;gap:4px;flex-shrink:0}
+.p-acts button{
+  width:32px;height:32px;border-radius:7px;border:none;
+  background:rgba(255,255,255,.05);color:var(--dim);
+  cursor:pointer;display:grid;place-items:center;
+  transition:all .25s;
+}
+.p-acts button:hover{background:var(--glass-2);color:var(--text)}
+.p-acts button.del:hover{background:rgba(239,68,68,.2);color:#fca5a5}
+.p-acts button svg{width:13px;height:13px}
+
+.empty{text-align:center;padding:40px 16px;color:var(--faint)}
+.empty-ico{font-size:44px;margin-bottom:8px;opacity:.4}
+.empty-t{font-size:12.5px;line-height:1.8}
+
+/* === Modal === */
+.ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;
+  z-index:100;padding:20px;animation:fadeIn .25s;
+}
+.ov.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  width:100%;max-width:440px;
+  background:linear-gradient(135deg,#0d1f24,#081418);
+  border:1px solid var(--border-2);border-radius:var(--r-lg);
+  padding:24px;animation:modalIn .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 25px 60px rgba(0,0,0,.6);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.9) translateY(15px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-t{font-size:17px;font-weight:900;margin-bottom:6px;background:linear-gradient(135deg,var(--c1),var(--c4));-webkit-background-clip:text;background-clip:text;color:transparent}
+.modal-s{color:var(--dim);font-size:12.5px;margin-bottom:16px;line-height:1.7}
+.modal-s a{color:var(--c1);text-decoration:none;font-weight:700}
+.modal-s a:hover{text-decoration:underline}
+
+/* === Toast === */
+.toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
+  background:linear-gradient(135deg,var(--c1),var(--c2));
+  color:#fff;padding:11px 20px;border-radius:24px;
+  font-size:13px;font-weight:700;z-index:200;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  max-width:90%;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* === Page switcher === */
+.page{display:none}
+.page.active{display:block;animation:fadeIn .3s}
+
+/* === Responsive === */
+@media(max-width:480px){
+  .container{padding:0 4px}
+  h1{font-size:24px}
+  .card{padding:18px}
+  textarea{min-height:200px;padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-grid"></div>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">📦</div>
+    <h1>دیپلوی من</h1>
+    <p class="subtitle">ساخت، مدیریت و ویرایش صفحات HTML</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="new">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      ساخت جدید
+    </button>
+    <button class="tab" data-tab="list">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      <span>لیست (<span id="tabCount">۰</span>)</span>
+    </button>
+  </div>
+
+  <!-- Token Bar -->
+  <div class="tb" id="tokenBar">
+    <div class="tb-dot"></div>
+    <div class="tb-info">
+      <div class="tb-name" id="tbName">توکنی تنظیم نشده</div>
+      <div class="tb-meta" id="tbMeta">برای شروع توکن GitHub اضافه کن</div>
+    </div>
+    <button class="tb-btn" id="btnManage">افزودن توکن</button>
+  </div>
+
+  <!-- Page: New -->
+  <div id="p-new" class="page active">
+    <div class="card">
+      <div class="card-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <h3>دیپلوی جدید</h3>
+        <span class="pill" id="modePill">ساخت</span>
+      </div>
+
+      <label class="lbl">نام پروژه (اختیاری)</label>
+      <input type="text" class="inp" id="pName" placeholder="مثال: صفحه اصلی" style="font-family:inherit;direction:rtl">
+
+      <div style="height:10px"></div>
+
+      <label class="lbl">کد HTML</label>
+      <div class="ew">
+        <div class="eb">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <span class="fn">index.html</span>
+          <div class="eb-s"></div>
+        </div>
+        <textarea id="htmlInput" spellcheck="false" placeholder="<!DOCTYPE html>&#10;<html>&#10;  <body>&#10;    <h1>سلام دنیا!</h1>&#10;  </body>&#10;</html>"></textarea>
+      </div>
+
+      <button class="btn" id="btnDeploy">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span id="btnDeployText">دیپلوی و دریافت لینک</span>
+      </button>
+
+      <div id="status" style="display:none"></div>
+      <div id="result" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Page: List -->
+  <div id="p-list" class="page">
+    <div class="card">
+      <div class="card-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <h3>پروژه‌های من</h3>
+        <span class="pill" id="listCount">۰ پروژه</span>
+      </div>
+
+      <div id="pList" class="plist"></div>
+      <div id="pEmpty" class="empty">
+        <div class="empty-ico">📦</div>
+        <div class="empty-t">هنوز پروژه‌ای نداری<br>از تب «ساخت جدید» شروع کن</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Token -->
+<div class="ov" id="mToken">
+  <div class="modal">
+    <div class="modal-t">🔑 توکن GitHub</div>
+    <p class="modal-s">
+      یک <b>Personal Access Token</b> با دسترسی <code>repo</code> نیاز داری.
+      از <a href="https://github.com/settings/tokens" target="_blank">اینجا</a> بساز.
+    </p>
+    <input type="password" class="inp" id="tValue" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="btn-row">
+      <button class="btn bs" id="btnClose">بستن</button>
+      <button class="btn" id="btnSave">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit -->
+<div class="ov" id="mEdit">
+  <div class="modal">
+    <div class="modal-t">✏️ ویرایش پروژه</div>
+    <p class="modal-s">محتوای HTML را ویرایش کن و دوباره دیپلوی کن.</p>
+    <input type="text" class="inp" id="editName" placeholder="نام" style="font-family:inherit;direction:rtl;margin-bottom:10px">
+    <textarea id="editHTML" style="width:100%;min-height:200px;background:rgba(0,0,0,.5);border:1.5px solid var(--border);border-radius:11px;color:var(--text);font-size:12.5px;padding:12px;font-family:monospace;outline:none;direction:ltr;text-align:left;resize:vertical"></textarea>
+    <div class="btn-row">
+      <button class="btn bs" id="btnEditCancel">انصراف</button>
+      <button class="btn bd" id="btnEditDelete">حذف</button>
+      <button class="btn" id="btnEditSave">ذخیره و دیپلوی</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const OWNER = "s09383181-ship-it";
+const REPO = "deploy-manager";
+const BRANCH = "main";
+const K = {tok:"dm_tok", projs:"dm_projs"};
+
+let projs = [];
+let editing = null;
+
+const $ = id => document.getElementById(id);
+const toFa = n => String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]);
+const rand = () => Math.random().toString(36).slice(2,8) + Date.now().toString(36).slice(-4);
+
+function load(){
+  try{
+    projs = JSON.parse(localStorage.getItem(K.projs) || "[]");
+  }catch(e){projs=[]}
+}
+function saveProjs(){localStorage.setItem(K.projs, JSON.stringify(projs))}
+function getTok(){return localStorage.getItem(K.tok) || ""}
+function setTok(t){localStorage.setItem(K.tok, t)}
+
+let toastT;
+function toast(m, t="ok"){
+  const el = $("toast");
+  el.textContent = m;
+  el.className = "toast show";
+  if(t==="err") el.style.background = "linear-gradient(135deg,var(--danger),#dc2626)";
+  else if(t==="warn") el.style.background = "linear-gradient(135deg,var(--warn),var(--c3))";
+  else el.style.background = "linear-gradient(135deg,var(--c1),var(--c2))";
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>el.classList.remove("show"), 3000);
+}
+
+function updateTokenBar(){
+  const t = getTok();
+  const bar = $("tokenBar");
+  if(!t){
+    bar.className = "tb";
+    $("tbName").textContent = "توکنی تنظیم نشده";
+    $("tbMeta").textContent = "برای شروع توکن GitHub اضافه کن";
+    $("btnManage").textContent = "افزودن توکن";
+  } else {
+    bar.className = "tb ok";
+    $("tbName").textContent = "توکن فعال";
+    $("tbMeta").textContent = t.slice(0,8) + "..." + t.slice(-4);
+    $("btnManage").textContent = "تغییر";
+  }
+}
+
+function renderList(){
+  $("tabCount").textContent = toFa(projs.length);
+  $("listCount").textContent = toFa(projs.length) + " پروژه";
+  const list = $("pList"), empty = $("pEmpty");
+  if(projs.length === 0){
+    list.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  list.innerHTML = projs.map(p=>{
+    const date = new Date(p.updated || p.created);
+    const dateStr = toFa(date.getFullYear()) + "/" + toFa(String(date.getMonth()+1).padStart(2,"0")) + "/" + toFa(String(date.getDate()).padStart(2,"0"));
+    return `<div class="pitem">
+      <div class="p-thumb">🚀</div>
+      <div class="p-info">
+        <div class="p-name">${esc(p.name)}</div>
+        <div class="p-url">${p.url}</div>
+        <div class="p-size">${toFa(Math.round(p.size/1024))} KB · ${dateStr}</div>
+      </div>
+      <div class="p-acts">
+        <button data-act="open" data-url="${p.url}" title="باز کن">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </button>
+        <button data-act="copy" data-text="${p.url}" title="کپی">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button data-act="edit" data-id="${p.id}" title="ویرایش">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="del" data-act="del" data-id="${p.id}" title="حذف">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function waitLive(url, maxMs=90000){
+  const start = Date.now();
+  let att = 0;
+  while(Date.now()-start < maxMs){
+    att++;
+    const sec = Math.floor((Date.now()-start)/1000);
+    setStatus("load", `<div class="spin"></div><div style="flex:1"><b>مرحله ۲ از ۲:</b> منتظر فعال شدن (${toFa(att)} - ${toFa(sec)}s)<div class="prog"><div class="prog-b" style="width:${Math.min(95,(sec/60)*100)}%"></div></div></div>`);
+    try{
+      const r = await fetch(url, {method:"GET", cache:"no-store"});
+      if(r.ok){
+        const t = await r.text();
+        if(t.length > 50 && !t.includes("404")) return true;
+      }
+    }catch(e){}
+    await new Promise(r=>setTimeout(r, 3000));
+  }
+  return false;
+}
+
+function setStatus(type, html){
+  const s = $("status");
+  s.className = "status st-"+type;
+  s.style.display = "flex";
+  s.innerHTML = html;
+}
+
+async function gh(path, opts={}){
+  const t = getTok();
+  if(!t) throw new Error("توکن تنظیم نشده");
+  const r = await fetch("https://api.github.com"+path, {
+    ...opts,
+    headers:{
+      Authorization: "token "+t,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+      ...(opts.headers||{})
+    }
+  });
+  if(!r.ok){
+    let m = ""; try{ m = (await r.json()).message || ""; }catch(e){}
+    throw new Error("خطای "+toFa(r.status)+": "+m);
+  }
+  return r.json();
+}
+
+async function deploy(name, html, existingId){
+  const token = getTok();
+  if(!token){
+    openOv("mToken");
+    setStatus("err", "⚠️ ابتدا توکن را وارد کن");
+    return null;
+  }
+  if(!html.trim()){
+    setStatus("err", "⚠️ کد HTML خالی است");
+    return null;
+  }
+  
+  const id = existingId || rand();
+  const path = `sites/${id}/index.html`;
+  const b64 = btoa(unescape(encodeURIComponent(html)));
+  
+  setStatus("load", '<div class="spin"></div><div style="flex:1"><b>مرحله ۱ از ۲:</b> در حال آپلود به GitHub...</div>');
+  
+  try{
+    await gh(`/repos/${OWNER}/${REPO}/contents/${path}`, {
+      method: "PUT",
+      body: JSON.stringify({message: "deploy "+name, content: b64, branch: BRANCH})
+    });
+    
+    const url = `https://${OWNER}.github.io/${REPO}/sites/${id}/`;
+    const ok = await waitLive(url, 90000);
+    
+    const proj = {
+      id, name, url,
+      html,
+      size: new Blob([html]).size,
+      updated: new Date().toISOString(),
+      created: existingId ? projs.find(p=>p.id===id)?.created : new Date().toISOString()
+    };
+    
+    if(existingId){
+      const idx = projs.findIndex(p=>p.id===id);
+      if(idx>=0) projs[idx] = {...projs[idx], ...proj};
+    } else {
+      projs.unshift(proj);
+    }
+    saveProjs();
+    renderList();
+    
+    if(ok){
+      setStatus("ok", "✅ لینک آماده استفاده است!");
+    } else {
+      setStatus("err", "⏰ آپلود شد. لینک تا ۱ دقیقه دیگر فعال می‌شود.");
+    }
+    showResult(url, proj.size);
+    return url;
+  }catch(e){
+    if(e.message.includes("Bad credentials") || e.message.includes("401")){
+      setStatus("err", "❌ توکن نامعتبر است");
+    } else {
+      setStatus("err", "❌ "+e.message);
+    }
+    return null;
+  }
+}
+
+function showResult(url, size){
+  const r = $("result");
+  r.style.display = "block";
+  r.innerHTML = `<div class="res">
+    <div class="res-l">🎉 منتشر شد!</div>
+    <div class="lbox">
+      <input type="text" value="${url}" readonly>
+      <button class="bico" data-act="copy" data-text="${url}" title="کپی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      <button class="bico" data-act="open" data-url="${url}" title="باز"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+    </div>
+  </div>`;
+  renderList();
+}
+
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); toast("کپی شد ✓"); }
+  catch(e){ prompt("کپی کن:", t); }
+}
+
+function openOv(id){$(id).classList.add("show")}
+function closeOv(id){$(id).classList.remove("show")}
+
+function goTab(name){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.tab===name));
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active", p.id==="p-"+name));
+  if(name==="list") renderList();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+async function deleteProj(id){
+  const p = projs.find(x=>x.id===id);
+  if(!p) return;
+  if(!confirm(`«${p.name}» حذف شود؟\n\n(فایل از GitHub هم پاک می‌شود)`)) return;
+  
+  setStatus("load", '<div class="spin"></div><div style="flex:1">در حال حذف از GitHub...</div>');
+  try{
+    // برای حذف فایل، نیاز به SHA داریم
+    const fileInfo = await gh(`/repos/${OWNER}/${REPO}/contents/sites/${id}/index.html`);
+    await gh(`/repos/${OWNER}/${REPO}/contents/sites/${id}/index.html`, {
+      method: "DELETE",
+      body: JSON.stringify({message: "delete "+p.name, sha: fileInfo.sha, branch: BRANCH})
+    });
+    projs = projs.filter(x=>x.id!==id);
+    saveProjs();
+    renderList();
+    $("status").style.display = "none";
+    $("result").style.display = "none";
+    toast("پروژه حذف شد ✓");
+  }catch(e){
+    // اگه فایل قبلاً پاک شده، فقط از لیست حذف کن
+    projs = projs.filter(x=>x.id!==id);
+    saveProjs();
+    renderList();
+    $("status").style.display = "none";
+    toast("از لیست حذف شد (فایل از قبل نبود)");
+  }
+}
+
+function openEdit(id){
+  const p = projs.find(x=>x.id===id);
+  if(!p) return;
+  editing = p;
+  $("editName").value = p.name;
+  $("editHTML").value = p.html;
+  openOv("mEdit");
+}
+
+async function saveEdit(){
+  if(!editing) return;
+  const name = $("editName").value.trim() || editing.name;
+  const html = $("editHTML").value;
+  closeOv("mEdit");
+  $("btnDeployText").textContent = "در حال آپدیت...";
+  $("btnDeploy").disabled = true;
+  await deploy(name, html, editing.id);
+  $("btnDeployText").textContent = "دیپلوی و دریافت لینک";
+  $("btnDeploy").disabled = false;
+  editing = null;
+  renderList();
+  goTab("list");
+}
+
+function delEdit(){
+  if(!editing) return;
+  const id = editing.id;
+  closeOv("mEdit");
+  editing = null;
+  deleteProj(id);
+}
+
+// ==== Init ====
+function init(){
+  load();
+  updateTokenBar();
+  renderList();
+  
+  $("btnManage").addEventListener("click", ()=>{
+    $("tValue").value = getTok() || "";
+    openOv("mToken");
+  });
+  $("btnClose").addEventListener("click", ()=>closeOv("mToken"));
+  $("mToken").addEventListener("click", e=>{if(e.target===$("mToken")) closeOv("mToken")});
+  
+  $("btnSave").addEventListener("click", async ()=>{
+    const v = $("tValue").value.trim();
+    if(!v){toast("توکن را وارد کن", "err"); return}
+    try{
+      const r = await fetch("https://api.github.com/user", {headers:{Authorization:"token "+v}});
+      if(!r.ok) throw new Error("نامعتبر");
+      const u = await r.json();
+      if(u.login.toLowerCase() !== OWNER.toLowerCase()) throw new Error("متعلق به @"+u.login+" نیست");
+      setTok(v);
+      updateTokenBar();
+      closeOv("mToken");
+      toast("توکن ذخیره شد ✓");
+    }catch(e){toast("خطا: "+e.message, "err")}
+  });
+  
+  $("btnDeploy").addEventListener("click", async ()=>{
+    const name = $("pName").value.trim();
+    const html = $("htmlInput").value;
+    $("result").style.display = "none";
+    $("btnDeploy").disabled = true;
+    $("btnDeployText").textContent = "در حال دیپلوی...";
+    await deploy(name || ("پروژه "+toFa(projs.length+1)), html, null);
+    $("btnDeploy").disabled = false;
+    $("btnDeployText").textContent = "دیپلوی و دریافت لینک";
+  });
+  
+  // Tabs
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=>goTab(t.dataset.tab));
+  });
+  
+  // Actions
+  document.addEventListener("click", e=>{
+    const a = e.target.closest("[data-act]");
+    if(!a) return;
+    const act = a.dataset.act;
+    if(act==="open") window.open(a.dataset.url, "_blank");
+    else if(act==="copy") copyText(a.dataset.text);
+    else if(act==="edit") openEdit(a.dataset.id);
+    else if(act==="del") deleteProj(a.dataset.id);
+  });
+  
+  // Edit modal
+  $("btnEditCancel").addEventListener("click", ()=>{editing=null; closeOv("mEdit")});
+  $("btnEditSave").addEventListener("click", saveEdit);
+  $("btnEditDelete").addEventListener("click", delEdit);
+  $("mEdit").addEventListener("click", e=>{if(e.target===$("mEdit")) closeOv("mEdit")});
+  
+  $("htmlInput").addEventListener("keydown", e=>{
+    if((e.ctrlKey||e.metaKey) && e.key==="Enter"){e.preventDefault(); $("btnDeploy").click()}
+  });
+  
+  $("htmlInput").focus();
+}
+
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init);
+else init();
+</script>
+</body>
+</html>
