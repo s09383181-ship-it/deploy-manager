@@ -1,1834 +1,309 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>فوتکشی ⚽</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دانلودر فارم لند</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;700&display=swap');
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #000;
+        }
 
-  :root {
-    --bg: #0d1117;
-    --bg2: #161b22;
-    --bg3: #1c2330;
-    --card-bg: #1e2633;
-    --accent: #f5a623;
-    --gem: #4fc3f7;
-    --token: #00e676;
-    --money: #f5a623;
-    --legend: #ffd700;
-    --epic: #e040fb;
-    --myth: #111;
-    --simple: #bf6a2f;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --green: #2ea043;
-    --red: #f85149;
-    --border: #30363d;
-  }
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
 
-  body {
-    font-family: 'Vazirmatn', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    max-width: 430px;
-    margin: 0 auto;
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-  }
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            pointer-events: none; /* اجازه عبور کلیک به لایه زیرین در صورت نیاز */
+        }
 
-  /* ===== HEADER ===== */
-  .header {
-    background: var(--bg2);
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-title {
-    font-size: 20px;
-    font-weight: 900;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .header-currencies {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  .currency-pill {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .currency-pill:hover { background: var(--card-bg); }
-  .currency-pill.money { color: var(--money); }
-  .currency-pill.gem { color: var(--gem); }
-  .currency-pill.token { color: var(--token); }
+        .card {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            padding: 50px;
+            border-radius: 40px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 1), inset 0 0 20px rgba(241, 196, 15, 0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 85%;
+            pointer-events: auto;
+            animation: cardEntrance 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-  /* ===== BOTTOM NAV ===== */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 430px;
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    display: flex;
-    z-index: 100;
-  }
-  .nav-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 4px;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 10px;
-    font-weight: 600;
-    transition: color 0.2s;
-    border-top: 2px solid transparent;
-  }
-  .nav-item.active {
-    color: var(--accent);
-    border-top-color: var(--accent);
-  }
-  .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #f1c40f;
+            text-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+            letter-spacing: -1px;
+        }
 
-  /* ===== PAGES ===== */
-  .page { display: none; padding: 12px 12px 80px; }
-  .page.active { display: block; }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 30px;
+        }
 
-  /* ===== SECTION HEADER ===== */
-  .section-header {
-    background: linear-gradient(135deg, var(--bg3), var(--card-bg));
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-    border: 1px solid var(--border);
-    text-align: right;
-  }
-  .section-header h2 { font-size: 18px; font-weight: 800; }
-  .section-header p { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        .btn {
+            padding: 18px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: bold;
+            text-decoration: none;
+            font-family: 'Vazirmatn', sans-serif;
+        }
 
-  /* ===== SHOP ===== */
-  .shop-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .shop-tab {
-    flex: 1;
-    padding: 10px 4px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-  }
-  .shop-tab.active {
-    background: var(--accent);
-    color: #000;
-    border-color: var(--accent);
-  }
+        .btn-new-link {
+            background: linear-gradient(135deg, #1a1a1a, #333);
+            color: #f1c40f;
+            border: 1px solid #f1c40f;
+        }
 
-  .shop-panel { display: none; }
-  .shop-panel.active { display: block; }
+        .btn-direct {
+            background: linear-gradient(135deg, #f1c40f, #d4ac0d);
+            color: #000;
+            box-shadow: 0 10px 20px rgba(241, 196, 15, 0.3);
+        }
 
-  .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .shop-item {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .shop-item:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .shop-item .item-icon { font-size: 32px; margin-bottom: 8px; }
-  .shop-item .item-amount { font-size: 20px; font-weight: 800; color: var(--gem); }
-  .shop-item.token-item .item-amount { color: var(--token); }
-  .shop-item .item-label { font-size: 11px; color: var(--muted); margin: 4px 0 10px; }
-  .shop-item .item-price {
-    background: var(--bg3);
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--money);
-    display: inline-block;
-  }
+        .btn:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        }
 
-  /* ===== PACKS ===== */
-  .pack-note {
-    background: var(--bg3);
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 14px;
-    text-align: center;
-    border: 1px solid var(--border);
-  }
+        .creator-link {
+            margin-top: 50px;
+            color: #777;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
 
-  .pack-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 14px;
-    position: relative;
-    overflow: hidden;
-  }
-  .pack-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-  }
-  .pack-card.bronze::before { background: linear-gradient(90deg, #bf6a2f, #e8a87c); }
-  .pack-card.gold::before { background: linear-gradient(90deg, #ffd700, #fff4a0); }
-  .pack-card.epic::before { background: linear-gradient(90deg, #e040fb, #f8bbd0); }
-  .pack-card.myth::before { background: linear-gradient(90deg, #555, #999); }
+        .creator-link:hover { color: #f1c40f; }
 
-  .pack-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-  }
-  .pack-info h3 { font-size: 17px; font-weight: 800; }
-  .pack-info p { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .pack-timer {
-    background: var(--bg3);
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent);
-    text-align: center;
-  }
-  .pack-timer small { display: block; font-size: 9px; color: var(--muted); font-weight: 400; }
+        /* --- MODALS --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
 
-  .pack-top-label {
-    font-size: 11px;
-    color: var(--accent);
-    margin-bottom: 8px;
-    font-weight: 600;
-  }
+        .modal {
+            background: #111;
+            border: 2px solid #f1c40f;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 350px;
+            width: 80%;
+            box-shadow: 0 0 40px rgba(241, 196, 15, 0.2);
+            animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
 
-  .pack-players-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .pack-player-slot {
-    background: var(--bg3);
-    border: 1px dashed var(--border);
-    border-radius: 10px;
-    width: 80px;
-    padding: 8px 6px;
-    text-align: center;
-    font-size: 10px;
-    color: var(--muted);
-    flex-shrink: 0;
-  }
-  .pack-player-slot.real {
-    border-style: solid;
-    cursor: default;
-  }
-  .pack-player-slot.legend { border-color: var(--legend); background: linear-gradient(160deg, #2a2200, #1a1600); }
-  .pack-player-slot.myth-card { border-color: #555; background: linear-gradient(160deg, #1a1a1a, #111); }
-  .pack-player-slot .slot-pos {
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--muted);
-    margin-bottom: 2px;
-  }
-  .pack-player-slot .slot-ovr {
-    font-size: 20px;
-    font-weight: 900;
-    color: var(--text);
-  }
-  .pack-player-slot.legend .slot-ovr { color: var(--legend); }
-  .pack-player-slot.myth-card .slot-ovr { color: #aaa; }
-  .pack-player-slot .slot-name { font-size: 10px; font-weight: 600; margin-top: 4px; line-height: 1.2; }
-  .pack-player-slot .slot-tier {
-    margin-top: 4px;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 10px;
-    display: inline-block;
-  }
-  .slot-tier.افسانه‌ای { background: #3a2800; color: var(--legend); }
-  .slot-tier.اسطوره { background: #222; color: #aaa; }
-  .slot-tier.حماسی { background: #3a0040; color: var(--epic); }
-  .slot-tier.ساده { background: #3a1500; color: var(--simple); }
+        .modal p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            color: #eee;
+        }
 
-  .pack-open-btn {
-    width: 100%;
-    padding: 13px;
-    border-radius: 12px;
-    font-family: 'Vazirmatn', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .pack-open-btn.money-btn { background: linear-gradient(135deg, #d4900a, #f5a623); color: #000; }
-  .pack-open-btn.gem-btn { background: linear-gradient(135deg, #0288d1, #4fc3f7); color: #000; }
-  .pack-open-btn:hover { transform: scale(1.02); }
-  .pack-open-btn:active { transform: scale(0.98); }
+        .modal-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-  .pack-rates {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-    justify-content: center;
-  }
-  .rate-pill {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 600;
-  }
-  .rate-myth { background: #222; color: #aaa; }
-  .rate-legend { background: #3a2800; color: var(--legend); }
-  .rate-epic { background: #3a0040; color: var(--epic); }
-  .rate-simple { background: #3a1500; color: #bf8a50; }
+        .modal-btn {
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Vazirmatn';
+            font-weight: bold;
+            transition: 0.3s;
+        }
 
-  /* ===== PLAYER CARDS ===== */
-  .players-filter {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    margin-bottom: 12px;
-    scrollbar-width: none;
-  }
-  .players-filter::-webkit-scrollbar { display: none; }
-  .filter-btn {
-    white-space: nowrap;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: 'Vazirmatn', sans-serif;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+        .btn-confirm { background: #f1c40f; color: #000; }
+        .btn-secondary { background: #333; color: #fff; }
+        .btn-danger { background: #e74c3c; color: #fff; }
 
-  .players-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-  }
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
-  .player-card {
-    border-radius: 12px;
-    padding: 10px 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-    position: relative;
-    border: 2px solid transparent;
-  }
-  .player-card:hover { transform: scale(1.03); }
-  .player-card.simple { background: linear-gradient(160deg, #3d1f0a, #5c2e0e); border-color: #bf6a2f55; }
-  .player-card.epic { background: linear-gradient(160deg, #3a0040, #5c0070); border-color: #e040fb55; }
-  .player-card.legend { background: linear-gradient(160deg, #2a2000, #4a3800); border-color: #ffd70055; }
-  .player-card.myth { background: linear-gradient(160deg, #1a1a1a, #2a2a2a); border-color: #55555555; }
-
-  .player-card .pc-pos { font-size: 9px; font-weight: 700; color: var(--muted); }
-  .player-card .pc-ovr { font-size: 22px; font-weight: 900; }
-  .player-card.simple .pc-ovr { color: #e8a87c; }
-  .player-card.epic .pc-ovr { color: var(--epic); }
-  .player-card.legend .pc-ovr { color: var(--legend); }
-  .player-card.myth .pc-ovr { color: #ccc; }
-  .player-card .pc-name { font-size: 10px; font-weight: 600; margin-top: 6px; line-height: 1.3; min-height: 28px; display: flex; align-items: center; justify-content: center; }
-  .player-card .pc-tier {
-    margin-top: 5px;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-    display: inline-block;
-  }
-  .player-card.simple .pc-tier { background: #5c2e0e; color: #e8a87c; }
-  .player-card.epic .pc-tier { background: #3a0040; color: var(--epic); }
-  .player-card.legend .pc-tier { background: #4a3800; color: var(--legend); }
-  .player-card.myth .pc-tier { background: #333; color: #aaa; }
-  .player-card .pc-role { font-size: 9px; color: var(--muted); margin-top: 3px; }
-
-  .player-card .upgrade-btn {
-    margin-top: 6px;
-    background: var(--bg);
-    border: 1px solid var(--token);
-    color: var(--token);
-    border-radius: 8px;
-    padding: 3px 8px;
-    font-size: 10px;
-    font-weight: 700;
-    font-family: 'Vazirmatn', sans-serif;
-    cursor: pointer;
-    width: 100%;
-    transition: background 0.2s;
-  }
-  .player-card .upgrade-btn:hover { background: var(--token); color: #000; }
-
-  /* ===== TEAM ===== */
-  .team-stats {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-  }
-  .team-stats-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-  }
-  .team-power-box { }
-  .team-power-box .label { font-size: 11px; color: var(--muted); }
-  .team-power-box .value { font-size: 32px; font-weight: 900; color: var(--gem); }
-  .team-bonus { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .team-bonus span { color: var(--green); }
-
-  .formation-btns {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-  }
-  .formation-btn {
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: 'Vazirmatn', sans-serif;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .formation-btn.active { background: var(--gem); color: #000; border-color: var(--gem); }
-
-  .auto-lineup-btn {
-    background: linear-gradient(135deg, #00897b, #00e676);
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 800;
-    font-family: 'Vazirmatn', sans-serif;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: transform 0.2s;
-  }
-  .auto-lineup-btn:hover { transform: scale(1.03); }
-
-  /* Football Field */
-  .field-container {
-    background: linear-gradient(180deg, #1a5c2a 0%, #1e6b31 50%, #1a5c2a 100%);
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 12px;
-    position: relative;
-    min-height: 420px;
-    border: 2px solid #2a7a3a;
-    overflow: hidden;
-  }
-  .field-container::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 10%;
-    right: 10%;
-    height: 2px;
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-50%);
-  }
-  .field-container::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 50%;
-  }
-
-  .field-row {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-
-  .field-player {
-    background: linear-gradient(160deg, #3d1f0a, #5c2e0e);
-    border: 2px solid #bf6a2f55;
-    border-radius: 10px;
-    padding: 6px 5px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-    min-width: 68px;
-  }
-  .field-player:hover { transform: scale(1.05); }
-  .field-player.epic-fp { background: linear-gradient(160deg, #3a0040, #5c0070); border-color: #e040fb55; }
-  .field-player.legend-fp { background: linear-gradient(160deg, #2a2000, #4a3800); border-color: #ffd70055; }
-  .field-player.myth-fp { background: linear-gradient(160deg, #1a1a1a, #2a2a2a); border-color: #55555555; }
-  .field-player .fp-pos { font-size: 8px; font-weight: 700; color: var(--muted); }
-  .field-player .fp-ovr { font-size: 16px; font-weight: 900; color: #e8a87c; }
-  .field-player.epic-fp .fp-ovr { color: var(--epic); }
-  .field-player.legend-fp .fp-ovr { color: var(--legend); }
-  .field-player.myth-fp .fp-ovr { color: #ccc; }
-  .field-player .fp-name { font-size: 9px; font-weight: 600; margin-top: 3px; line-height: 1.2; }
-  .field-player .fp-pos-label { font-size: 8px; color: rgba(255,255,255,0.5); margin-top: 2px; }
-
-  .empty-slot {
-    background: rgba(255,255,255,0.05);
-    border: 2px dashed rgba(255,255,255,0.2);
-    border-radius: 10px;
-    min-width: 68px;
-    padding: 14px 5px;
-    text-align: center;
-    cursor: pointer;
-    color: rgba(255,255,255,0.3);
-    font-size: 20px;
-  }
-
-  /* Bench */
-  .bench-section {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px;
-  }
-  .bench-title {
-    font-size: 14px;
-    font-weight: 800;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .bench-scroll {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-  .bench-scroll::-webkit-scrollbar { display: none; }
-  .bench-player {
-    flex-shrink: 0;
-    background: linear-gradient(160deg, #3d1f0a, #5c2e0e);
-    border: 2px solid #bf6a2f55;
-    border-radius: 10px;
-    padding: 8px 6px;
-    text-align: center;
-    width: 72px;
-    cursor: pointer;
-  }
-  .bench-player .bp-pos { font-size: 9px; font-weight: 700; color: var(--muted); }
-  .bench-player .bp-ovr { font-size: 18px; font-weight: 900; color: #e8a87c; }
-  .bench-player .bp-name { font-size: 9px; font-weight: 600; margin-top: 3px; line-height: 1.2; }
-  .bench-player .bp-tier { font-size: 8px; margin-top: 3px; color: #bf8a50; }
-  .bench-player .bp-role { font-size: 8px; color: var(--muted); margin-top: 2px; }
-
-  /* ===== COMPETITIONS ===== */
-  .comp-header-card {
-    background: linear-gradient(135deg, #0d2137, #1a3a5c);
-    border: 1px solid #1e4d7a;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 14px;
-    text-align: center;
-  }
-  .comp-header-card h2 { font-size: 18px; font-weight: 900; color: var(--gem); }
-  .comp-header-card p { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-  .comp-stages {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .stage-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .stage-card:hover { border-color: var(--accent); }
-  .stage-card.locked { opacity: 0.5; cursor: not-allowed; }
-  .stage-card.completed { border-color: var(--green); }
-
-  .stage-info { flex: 1; }
-  .stage-num { font-size: 10px; color: var(--muted); font-weight: 600; }
-  .stage-name { font-size: 14px; font-weight: 800; margin-top: 2px; }
-  .stage-opp { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .stage-rewards {
-    font-size: 10px;
-    color: var(--money);
-    margin-top: 4px;
-  }
-
-  .stage-action {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .stage-status {
-    font-size: 18px;
-  }
-  .play-btn {
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 800;
-    font-family: 'Vazirmatn', sans-serif;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  .play-btn:hover { transform: scale(1.05); }
-
-  /* ===== MATCH SIMULATION ===== */
-  .match-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .match-box {
-    background: linear-gradient(160deg, #0d1f3a, #0a3020);
-    border: 1px solid #1e4d7a;
-    border-radius: 20px;
-    padding: 24px;
-    width: 100%;
-    max-width: 380px;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-  .match-title {
-    text-align: center;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-  .match-score-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 8px;
-  }
-  .match-team {
-    text-align: center;
-    flex: 1;
-  }
-  .match-team .team-name { font-size: 14px; font-weight: 800; }
-  .match-team .team-power { font-size: 11px; margin-top: 4px; }
-  .match-team.my-team .team-power { color: var(--green); }
-  .match-team.opp-team .team-power { color: var(--red); }
-  .match-score {
-    font-size: 42px;
-    font-weight: 900;
-    min-width: 90px;
-    text-align: center;
-  }
-  .match-minute {
-    text-align: center;
-    font-size: 13px;
-    color: var(--accent);
-    font-weight: 700;
-    margin-bottom: 14px;
-  }
-
-  .match-log {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 12px;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-  .log-entry {
-    background: var(--bg3);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    animation: slideIn 0.3s ease;
-  }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-  .log-entry.goal { background: linear-gradient(135deg, #1a3a00, #2a5c00); border: 1px solid var(--green); }
-  .log-entry.opp-goal { background: linear-gradient(135deg, #3a0000, #5c0000); border: 1px solid var(--red); }
-
-  .match-start-dot {
-    width: 10px; height: 10px;
-    background: var(--green);
-    border-radius: 50%;
-    display: inline-block;
-    animation: pulse 1.5s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
-
-  .match-result-section {
-    text-align: center;
-    margin-top: 16px;
-  }
-  .match-result-title { font-size: 24px; font-weight: 900; }
-  .match-result-title.win { color: var(--green); }
-  .match-result-title.lose { color: var(--red); }
-  .match-result-title.draw { color: var(--accent); }
-  .match-rewards { font-size: 13px; color: var(--money); margin-top: 8px; }
-  .close-match-btn {
-    margin-top: 14px;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 32px;
-    font-size: 15px;
-    font-weight: 800;
-    font-family: 'Vazirmatn', sans-serif;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  .close-match-btn:hover { transform: scale(1.03); }
-
-  /* ===== TOAST ===== */
-  .toast {
-    position: fixed;
-    top: 70px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100px);
-    background: var(--green);
-    color: #000;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 700;
-    z-index: 300;
-    transition: transform 0.3s;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.error { background: var(--red); color: #fff; }
-  .toast.info { background: var(--gem); color: #000; }
-
-  /* ===== PACK OPEN ANIMATION ===== */
-  .pack-open-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.9);
-    z-index: 250;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 16px;
-    padding: 20px;
-  }
-  .pack-open-result {
-    background: var(--card-bg);
-    border-radius: 16px;
-    padding: 20px;
-    width: 100%;
-    max-width: 360px;
-  }
-  .pack-open-result h3 { text-align: center; font-size: 18px; margin-bottom: 14px; color: var(--accent); }
-  .pack-results-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-  .result-player-card {
-    border-radius: 10px;
-    padding: 10px 6px;
-    text-align: center;
-    animation: popIn 0.4s ease backwards;
-  }
-  @keyframes popIn { from { opacity:0; transform: scale(0.5); } to { opacity:1; transform: scale(1); } }
-  .result-player-card.simple { background: linear-gradient(160deg, #3d1f0a, #5c2e0e); border: 2px solid #bf6a2f; }
-  .result-player-card.epic { background: linear-gradient(160deg, #3a0040, #5c0070); border: 2px solid var(--epic); }
-  .result-player-card.legend { background: linear-gradient(160deg, #2a2000, #4a3800); border: 2px solid var(--legend); }
-  .result-player-card.myth { background: linear-gradient(160deg, #1a1a1a, #2a2a2a); border: 2px solid #888; }
-  .result-player-card .rpc-pos { font-size: 9px; color: var(--muted); }
-  .result-player-card .rpc-ovr { font-size: 20px; font-weight: 900; }
-  .result-player-card.simple .rpc-ovr { color: #e8a87c; }
-  .result-player-card.epic .rpc-ovr { color: var(--epic); }
-  .result-player-card.legend .rpc-ovr { color: var(--legend); }
-  .result-player-card.myth .rpc-ovr { color: #ccc; }
-  .result-player-card .rpc-name { font-size: 9px; font-weight: 600; margin-top: 4px; line-height: 1.2; }
-  .result-player-card .rpc-tier { font-size: 8px; margin-top: 3px; padding: 1px 6px; border-radius: 8px; display: inline-block; }
-  .result-player-card.simple .rpc-tier { background: #5c2e0e; color: #e8a87c; }
-  .result-player-card.epic .rpc-tier { background: #3a0040; color: var(--epic); }
-  .result-player-card.legend .rpc-tier { background: #4a3800; color: var(--legend); }
-  .result-player-card.myth .rpc-tier { background: #333; color: #aaa; }
-
-  .pack-close-btn {
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 32px;
-    font-size: 15px;
-    font-weight: 800;
-    font-family: 'Vazirmatn', sans-serif;
-    cursor: pointer;
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-</style>
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-  <div class="header-currencies">
-    <div class="currency-pill token" id="hdr-token">🔧 <span id="hdr-token-val">17</span></div>
-    <div class="currency-pill gem" id="hdr-gem">💎 <span id="hdr-gem-val">20</span></div>
-    <div class="currency-pill money">💰 <span id="hdr-money-val">1,250</span></div>
-  </div>
-  <div class="header-title">فوتکشی ⚽</div>
-</div>
+    <canvas id="bgCanvas"></canvas>
 
-<!-- Pages -->
-<div id="page-shop" class="page active">
-  <div class="section-header">
-    <h2>🛒 فروشگاه</h2>
-    <p>پک باز کن، جم بخر، توکن جمع کن!</p>
-  </div>
-  <div class="shop-tabs">
-    <div class="shop-tab" onclick="switchShopTab('token')">🔧 خرید توکن</div>
-    <div class="shop-tab" onclick="switchShopTab('gem')">💎 خرید جم</div>
-    <div class="shop-tab active" onclick="switchShopTab('packs')">🎁 پک‌ها</div>
-  </div>
+    <div class="ui-layer">
+        <div class="card">
+            <h1>دانلودر فارم لند</h1>
+            
+            <div class="btn-group">
+                <a href="https://uplod.ir/bdwzonf0x2ri/Farm-City-v2.11.3-MOD._.htm" class="btn btn-new-link">لینک جدید</a>
+                <button onclick="showFirstModal()" class="btn btn-direct">دانلود مستقیم</button>
+            </div>
 
-  <!-- Token Panel -->
-  <div id="shop-token" class="shop-panel">
-    <div class="shop-grid">
-      <div class="shop-item token-item" onclick="buyToken(5,1500)">
-        <div class="item-icon">🔧</div>
-        <div class="item-amount">۵ توکن</div>
-        <div class="item-label">برای آپگرید بازیکنا</div>
-        <div class="item-price">💰 ۱,۵۰۰</div>
-      </div>
-      <div class="shop-item token-item" onclick="buyToken(15,4000)">
-        <div class="item-icon">🔧</div>
-        <div class="item-amount">۱۵ توکن</div>
-        <div class="item-label">برای آپگرید بازیکنا</div>
-        <div class="item-price">💰 ۴,۰۰۰</div>
-      </div>
-      <div class="shop-item token-item" onclick="buyToken(40,9500)">
-        <div class="item-icon">🔧</div>
-        <div class="item-amount">۴۰ توکن</div>
-        <div class="item-label">برای آپگرید بازیکنا</div>
-        <div class="item-price">💰 ۹,۵۰۰</div>
-      </div>
-      <div class="shop-item token-item" onclick="buyToken(100,21000)">
-        <div class="item-icon">🔧</div>
-        <div class="item-amount">۱۰۰ توکن</div>
-        <div class="item-label">برای آپگرید بازیکنا</div>
-        <div class="item-price">💰 ۲۱,۰۰۰</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Gem Panel -->
-  <div id="shop-gem" class="shop-panel">
-    <div class="shop-grid">
-      <div class="shop-item" onclick="buyGem(20,4000)">
-        <div class="item-icon">💎</div>
-        <div class="item-amount">۲۰ جم</div>
-        <div class="item-label">ارز ویژه بازی</div>
-        <div class="item-price">💰 ۴,۰۰۰</div>
-      </div>
-      <div class="shop-item" onclick="buyGem(60,11000)">
-        <div class="item-icon">💎</div>
-        <div class="item-amount">۶۰ جم</div>
-        <div class="item-label">ارز ویژه بازی</div>
-        <div class="item-price">💰 ۱۱,۰۰۰</div>
-      </div>
-      <div class="shop-item" onclick="buyGem(150,25000)">
-        <div class="item-icon">💎</div>
-        <div class="item-amount">۱۵۰ جم</div>
-        <div class="item-label">ارز ویژه بازی</div>
-        <div class="item-price">💰 ۲۵,۰۰۰</div>
-      </div>
-      <div class="shop-item" onclick="buyGem(400,60000)">
-        <div class="item-icon">💎</div>
-        <div class="item-amount">۴۰۰ جم</div>
-        <div class="item-label">ارز ویژه بازی</div>
-        <div class="item-price">💰 ۶۰,۰۰۰</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Packs Panel -->
-  <div id="shop-packs" class="shop-panel active">
-    <div class="pack-note">⏰ هر پک ۳۰ بازیکن داره و وقتی تایمرش تموم بشه، خودکار با ۳۰ بازیکن جدید جایگزین میشه!</div>
-    <div id="packs-container"></div>
-  </div>
-</div>
-
-<div id="page-players" class="page">
-  <div class="section-header">
-    <h2>🃏 بازیکنان</h2>
-    <p id="players-count-label">کلکسیون: X از ۲۰۰ بازیکن — روی کارت بزن تا آپگرید کنی</p>
-  </div>
-  <div class="players-filter">
-    <div class="filter-btn active" onclick="filterPlayers('all',this)">همه</div>
-    <div class="filter-btn" onclick="filterPlayers('مال من',this)">مال من</div>
-    <div class="filter-btn" onclick="filterPlayers('اسطوره',this)">اسطوره</div>
-    <div class="filter-btn" onclick="filterPlayers('افسانه‌ای',this)">افسانه‌ای</div>
-    <div class="filter-btn" onclick="filterPlayers('حماسی',this)">حماسی</div>
-    <div class="filter-btn" onclick="filterPlayers('ساده',this)">ساده</div>
-  </div>
-  <div class="players-grid" id="players-grid"></div>
-</div>
-
-<div id="page-team" class="page">
-  <div class="team-stats">
-    <div class="team-stats-top">
-      <div>
-        <div class="team-power-box">
-          <div class="label">قدرت تیم</div>
-          <div class="value" id="team-power-display">0</div>
+            <a href="https://rubika.ir/ZIDIAC_MAFIANIGHTS" target="_blank" class="creator-link">چنل سازنده</a>
         </div>
-        <div class="team-bonus" id="formation-bonus"></div>
-      </div>
-      <div style="font-size:24px">👥 تیم من</div>
     </div>
-    <div class="formation-btns">
-      <div class="formation-btn active" onclick="setFormation('3-5-2',this)">3-5-2</div>
-      <div class="formation-btn" onclick="setFormation('4-2-3-1',this)">4-2-3-1</div>
-      <div class="formation-btn" onclick="setFormation('4-4-2',this)">4-4-2</div>
-      <div class="formation-btn" onclick="setFormation('4-3-3',this)">4-3-3</div>
+
+    <!-- Modal 1: Warning -->
+    <div class="modal-overlay" id="modal1">
+        <div class="modal">
+            <p>اگر از تاریخ 11 تیر بگذرد بخشه دانلود مستقیم کار نمی‌کند و باید وارد بخش لینک جدید شوید</p>
+            <div class="modal-btns">
+                <button class="modal-btn btn-confirm" onclick="showSecondModal()">متوجه شدم</button>
+                <button class="modal-btn btn-secondary" onclick="closeAll()">انصراف</button>
+            </div>
+        </div>
     </div>
-    <button class="auto-lineup-btn" onclick="autoLineup()">⚡ چینش خودکار</button>
-  </div>
 
-  <div class="field-container" id="field-container"></div>
-
-  <div class="bench-section">
-    <div class="bench-title">🪑 نیم‌کت (<span id="bench-count">0</span>)</div>
-    <div class="bench-scroll" id="bench-scroll"></div>
-  </div>
-</div>
-
-<div id="page-comp" class="page">
-  <div class="comp-header-card">
-    <h2>⚔️ مسابقات فوتکشی</h2>
-    <p>۳۰۰ مرحله — تیمت رو قوی کن و پیش برو!</p>
-  </div>
-  <div class="comp-stages" id="comp-stages"></div>
-</div>
-
-<!-- Bottom Nav -->
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="showPage('shop',this)">
-    <div class="nav-icon">🛒</div>
-    <div>فروشگاه</div>
-  </div>
-  <div class="nav-item" onclick="showPage('players',this)">
-    <div class="nav-icon">🃏</div>
-    <div>بازیکنان</div>
-  </div>
-  <div class="nav-item" onclick="showPage('team',this)">
-    <div class="nav-icon">👥</div>
-    <div>تیم</div>
-  </div>
-  <div class="nav-item" onclick="showPage('comp',this)">
-    <div class="nav-icon">🏆</div>
-    <div>مسابقات</div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<!-- Match Overlay -->
-<div class="match-overlay" id="match-overlay" style="display:none">
-  <div class="match-box" id="match-box"></div>
-</div>
-
-<!-- Pack Open Overlay -->
-<div class="pack-open-overlay" id="pack-overlay" style="display:none">
-  <div class="pack-open-result">
-    <h3>🎁 بازیکنان دریافتی</h3>
-    <div class="pack-results-grid" id="pack-results-grid"></div>
-  </div>
-  <button class="pack-close-btn" onclick="closePack()">✅ بستن</button>
-</div>
-
-<script>
-// ===================== DATA =====================
-const ALL_PLAYERS = [
-  // MYTH (اسطوره) - OVR 92-99 - BLACK
-  {id:1,name:"کریستیانو رونالدو",pos:"ST",ovr:99,tier:"اسطوره",nation:"پرتغال"},
-  {id:2,name:"لیونل مسی",pos:"CAM",ovr:98,tier:"اسطوره",nation:"آرژانتین"},
-  {id:3,name:"کیلیان امباپه",pos:"ST",ovr:97,tier:"اسطوره",nation:"فرانسه"},
-  {id:4,name:"ارلینگ هالاند",pos:"ST",ovr:96,tier:"اسطوره",nation:"نروژ"},
-  {id:5,name:"لو یاشین",pos:"GK",ovr:95,tier:"اسطوره",nation:"روسیه"},
-  {id:6,name:"رونالدو نازاریو",pos:"ST",ovr:94,tier:"اسطوره",nation:"برزیل"},
-  {id:7,name:"زینالدین زیدان",pos:"CM",ovr:95,tier:"اسطوره",nation:"فرانسه"},
-  {id:8,name:"پله",pos:"ST",ovr:97,tier:"اسطوره",nation:"برزیل"},
-  {id:9,name:"دیگو مارادونا",pos:"CAM",ovr:96,tier:"اسطوره",nation:"آرژانتین"},
-  {id:10,name:"رونالدینیو",pos:"CAM",ovr:94,tier:"اسطوره",nation:"برزیل"},
-  // LEGEND (افسانه‌ای) - OVR 85-91 - GOLD
-  {id:11,name:"زلاتان ابراهیموویچ",pos:"ST",ovr:91,tier:"افسانه‌ای",nation:"سوئد"},
-  {id:12,name:"نیمار",pos:"LW",ovr:90,tier:"افسانه‌ای",nation:"برزیل"},
-  {id:13,name:"لوکا مودریچ",pos:"CM",ovr:91,tier:"افسانه‌ای",nation:"کرواسی"},
-  {id:14,name:"رابرت لواندوفسکی",pos:"ST",ovr:90,tier:"افسانه‌ای",nation:"لهستان"},
-  {id:15,name:"کاکا",pos:"CAM",ovr:91,tier:"افسانه‌ای",nation:"برزیل"},
-  {id:16,name:"ویرژیل وان دایک",pos:"CB",ovr:89,tier:"افسانه‌ای",nation:"هلند"},
-  {id:17,name:"مانوئل نویر",pos:"GK",ovr:90,tier:"افسانه‌ای",nation:"آلمان"},
-  {id:18,name:"کوین دی بروینه",pos:"CM",ovr:91,tier:"افسانه‌ای",nation:"بلژیک"},
-  {id:19,name:"مهدی مهدوی‌کیا",pos:"RB",ovr:88,tier:"افسانه‌ای",nation:"ایران"},
-  {id:20,name:"فرانک لمپارد",pos:"CM",ovr:87,tier:"افسانه‌ای",nation:"انگلیس"},
-  {id:21,name:"تیری آنری",pos:"ST",ovr:91,tier:"افسانه‌ای",nation:"فرانسه"},
-  {id:22,name:"استیون جرارد",pos:"CM",ovr:88,tier:"افسانه‌ای",nation:"انگلیس"},
-  {id:23,name:"دیدیه دروگبا",pos:"ST",ovr:88,tier:"افسانه‌ای",nation:"ساحل عاج"},
-  {id:24,name:"فرانچسکو توتی",pos:"CAM",ovr:89,tier:"افسانه‌ای",nation:"ایتالیا"},
-  {id:25,name:"ساندرو مازولا",pos:"CM",ovr:86,tier:"افسانه‌ای",nation:"ایتالیا"},
-  {id:26,name:"علی دایی",pos:"ST",ovr:88,tier:"افسانه‌ای",nation:"ایران"},
-  {id:27,name:"جاوید نکونام",pos:"CM",ovr:85,tier:"افسانه‌ای",nation:"ایران"},
-  {id:28,name:"پائولو مالدینی",pos:"CB",ovr:91,tier:"افسانه‌ای",nation:"ایتالیا"},
-  {id:29,name:"پاتریک ویرا",pos:"CDM",ovr:87,tier:"افسانه‌ای",nation:"فرانسه"},
-  {id:30,name:"رومن مارتن نداور",pos:"GK",ovr:86,tier:"افسانه‌ای",nation:"فرانسه"},
-  // EPIC (حماسی) - OVR 75-84 - PINK
-  {id:31,name:"بوکایو ساکا",pos:"RW",ovr:86,tier:"حماسی",nation:"انگلیس"},
-  {id:32,name:"ادوارد منی",pos:"LW",ovr:84,tier:"حماسی",nation:"سنگال"},
-  {id:33,name:"ویلیام سالیبا",pos:"CB",ovr:83,tier:"حماسی",nation:"فرانسه"},
-  {id:34,name:"فیل فودن",pos:"CAM",ovr:85,tier:"حماسی",nation:"انگلیس"},
-  {id:35,name:"جود بلینگهام",pos:"CM",ovr:86,tier:"حماسی",nation:"انگلیس"},
-  {id:36,name:"پدری",pos:"CM",ovr:84,tier:"حماسی",nation:"اسپانیا"},
-  {id:37,name:"گاوی",pos:"CM",ovr:83,tier:"حماسی",nation:"اسپانیا"},
-  {id:38,name:"وینیسیوس جونیور",pos:"LW",ovr:85,tier:"حماسی",nation:"برزیل"},
-  {id:39,name:"رودریگو",pos:"RW",ovr:83,tier:"حماسی",nation:"برزیل"},
-  {id:40,name:"فدریکو والورده",pos:"CM",ovr:82,tier:"حماسی",nation:"اروگوئه"},
-  {id:41,name:"آنتوان گریزمان",pos:"CAM",ovr:84,tier:"حماسی",nation:"فرانسه"},
-  {id:42,name:"لئوناردو بونوچی",pos:"CB",ovr:82,tier:"حماسی",nation:"ایتالیا"},
-  {id:43,name:"مارکوس راشفورد",pos:"LW",ovr:82,tier:"حماسی",nation:"انگلیس"},
-  {id:44,name:"رافائل لئائو",pos:"LW",ovr:84,tier:"حماسی",nation:"پرتغال"},
-  {id:45,name:"آلفونسو دیویس",pos:"LB",ovr:83,tier:"حماسی",nation:"کانادا"},
-  {id:46,name:"نوسائیر مزراوی",pos:"RB",ovr:82,tier:"حماسی",nation:"مراکش"},
-  {id:47,name:"میلان اسکرینیار",pos:"CB",ovr:82,tier:"حماسی",nation:"اسلواکی"},
-  {id:48,name:"آنتونی",pos:"RW",ovr:79,tier:"حماسی",nation:"برزیل"},
-  {id:49,name:"کریستین اریکسن",pos:"CAM",ovr:81,tier:"حماسی",nation:"دانمارک"},
-  {id:50,name:"صادق محرمی",pos:"RB",ovr:76,tier:"حماسی",nation:"ایران"},
-  {id:51,name:"سردار آزمون",pos:"ST",ovr:78,tier:"حماسی",nation:"ایران"},
-  {id:52,name:"علیرضا جهانبخش",pos:"RW",ovr:81,tier:"حماسی",nation:"ایران"},
-  {id:53,name:"ایگور میتروویچ",pos:"ST",ovr:82,tier:"حماسی",nation:"صربستان"},
-  {id:54,name:"دومنیکو بروکالی",pos:"CM",ovr:80,tier:"حماسی",nation:"ایتالیا"},
-  {id:55,name:"خاویر مورفی",pos:"CAM",ovr:77,tier:"حماسی",nation:"مکزیک"},
-  {id:56,name:"کارلوس سوسا",pos:"GK",ovr:78,tier:"حماسی",nation:"پرتغال"},
-  {id:57,name:"ماتئوس کونهیا",pos:"ST",ovr:81,tier:"حماسی",nation:"برزیل"},
-  {id:58,name:"تیم کیل",pos:"RB",ovr:79,tier:"حماسی",nation:"انگلیس"},
-  {id:59,name:"مایکل اولایینکا",pos:"ST",ovr:78,tier:"حماسی",nation:"ایرلند"},
-  {id:60,name:"یاریک حافنیر",pos:"LW",ovr:77,tier:"حماسی",nation:"هلند"},
-  // SIMPLE (ساده) - OVR 55-74 - BRONZE
-  {id:61,name:"مهرداد اولادی",pos:"ST",ovr:58,tier:"ساده",nation:"ایران"},
-  {id:62,name:"غلامرضا عنایتی",pos:"ST",ovr:60,tier:"ساده",nation:"ایران"},
-  {id:63,name:"علی انصاریان",pos:"LB",ovr:58,tier:"ساده",nation:"ایران"},
-  {id:64,name:"محرم نویدکیا",pos:"CAM",ovr:64,tier:"ساده",nation:"ایران"},
-  {id:65,name:"خسرو حیدری",pos:"RB",ovr:61,tier:"ساده",nation:"ایران"},
-  {id:66,name:"ابراهیم صادقی",pos:"CDM",ovr:59,tier:"ساده",nation:"ایران"},
-  {id:67,name:"ایمان مبعلی",pos:"CAM",ovr:61,tier:"ساده",nation:"ایران"},
-  {id:68,name:"مهدی رحمتی",pos:"GK",ovr:62,tier:"ساده",nation:"ایران"},
-  {id:69,name:"سیدجلال حسینی",pos:"CB",ovr:63,tier:"ساده",nation:"ایران"},
-  {id:70,name:"جواد کاظمیان",pos:"RW",ovr:60,tier:"ساده",nation:"ایران"},
-  {id:71,name:"محسن بنگر",pos:"CB",ovr:59,tier:"ساده",nation:"ایران"},
-  {id:72,name:"استفان دی فرای",pos:"CB",ovr:80,tier:"ساده",nation:"هلند"},
-  {id:73,name:"صادق محرمی",pos:"RB",ovr:74,tier:"ساده",nation:"ایران"},
-  {id:74,name:"مصطفی پورعلی‌گنجی",pos:"CB",ovr:67,tier:"ساده",nation:"ایران"},
-  {id:75,name:"رحیم زاهدی",pos:"GK",ovr:56,tier:"ساده",nation:"ایران"},
-  {id:76,name:"حامد لک",pos:"GK",ovr:58,tier:"ساده",nation:"ایران"},
-  {id:77,name:"فرشید اسماعیلی",pos:"RB",ovr:57,tier:"ساده",nation:"ایران"},
-  {id:78,name:"حسن بیت‌سعید",pos:"LW",ovr:72,tier:"ساده",nation:"ایران"},
-  {id:79,name:"کریم انصاری‌فرد",pos:"ST",ovr:69,tier:"ساده",nation:"ایران"},
-  {id:80,name:"محمد نصرتی",pos:"CDM",ovr:65,tier:"ساده",nation:"ایران"},
-  {id:81,name:"رضا قوچان‌نژاد",pos:"ST",ovr:71,tier:"ساده",nation:"ایران"},
-  {id:82,name:"وحید امیری",pos:"LW",ovr:68,tier:"ساده",nation:"ایران"},
-  {id:83,name:"مهدی طارمی",pos:"ST",ovr:74,tier:"ساده",nation:"ایران"},
-  {id:84,name:"علیرضا بیرانوند",pos:"GK",ovr:72,tier:"ساده",nation:"ایران"},
-  {id:85,name:"مجتبی جباری",pos:"RW",ovr:66,tier:"ساده",nation:"ایران"},
-  {id:86,name:"علی کریمی",pos:"CAM",ovr:73,tier:"ساده",nation:"ایران"},
-  {id:87,name:"میثم بائی",pos:"CDM",ovr:62,tier:"ساده",nation:"ایران"},
-  {id:88,name:"محمد موسوی",pos:"LB",ovr:60,tier:"ساده",nation:"ایران"},
-  {id:89,name:"سعید عزت‌اللهی",pos:"CM",ovr:70,tier:"ساده",nation:"ایران"},
-  {id:90,name:"آندره اونانا",pos:"GK",ovr:73,tier:"ساده",nation:"کامرون"},
-  {id:91,name:"دیوگو ژوتا",pos:"LW",ovr:72,tier:"ساده",nation:"پرتغال"},
-  {id:92,name:"مارتینلی",pos:"LW",ovr:73,tier:"ساده",nation:"برزیل"},
-  {id:93,name:"مارکوس تورام",pos:"ST",ovr:71,tier:"ساده",nation:"فرانسه"},
-  {id:94,name:"نیکولاس ویلیامز",pos:"LW",ovr:70,tier:"ساده",nation:"اسپانیا"},
-  {id:95,name:"هوستون مارتین",pos:"CB",ovr:69,tier:"ساده",nation:"آمریکا"},
-  {id:96,name:"برونو فرناندش",pos:"CAM",ovr:74,tier:"ساده",nation:"پرتغال"},
-  {id:97,name:"دووان زاباریا",pos:"CB",ovr:68,tier:"ساده",nation:"صربستان"},
-  {id:98,name:"رنه آدلر",pos:"GK",ovr:65,tier:"ساده",nation:"آلمان"},
-  {id:99,name:"ولادیمیر کاویاژ",pos:"CM",ovr:63,tier:"ساده",nation:"اسلونی"},
-  {id:100,name:"داوید رایا",pos:"GK",ovr:72,tier:"ساده",nation:"اسپانیا"},
-  {id:101,name:"ستاره‌ای مجهول",pos:"CM",ovr:55,tier:"ساده",nation:"ناشناس"},
-  {id:102,name:"یوهان کرویف",pos:"CAM",ovr:93,tier:"اسطوره",nation:"هلند"},
-  {id:103,name:"فرانتس بکن‌باور",pos:"CB",ovr:92,tier:"اسطوره",nation:"آلمان"},
-  {id:104,name:"میشل پلاتینی",pos:"CAM",ovr:93,tier:"اسطوره",nation:"فرانسه"},
-  {id:105,name:"روبرتو باجو",pos:"CAM",ovr:91,tier:"افسانه‌ای",nation:"ایتالیا"},
-  {id:106,name:"رائول گونزالس",pos:"ST",ovr:89,tier:"افسانه‌ای",nation:"اسپانیا"},
-  {id:107,name:"فابیو کانناوارو",pos:"CB",ovr:88,tier:"افسانه‌ای",nation:"ایتالیا"},
-  {id:108,name:"رونی",pos:"ST",ovr:87,tier:"افسانه‌ای",nation:"انگلیس"},
-  {id:109,name:"شواتسنباخ",pos:"CM",ovr:86,tier:"افسانه‌ای",nation:"سوئیس"},
-  {id:110,name:"لوئیس فیگو",pos:"RW",ovr:90,tier:"افسانه‌ای",nation:"پرتغال"},
-  {id:111,name:"ریو فردیناند",pos:"CB",ovr:87,tier:"افسانه‌ای",nation:"انگلیس"},
-  {id:112,name:"آشلی کول",pos:"LB",ovr:86,tier:"افسانه‌ای",nation:"انگلیس"},
-  {id:113,name:"پاتریک کلوئیورت",pos:"ST",ovr:86,tier:"افسانه‌ای",nation:"هلند"},
-  {id:114,name:"گائوکو",pos:"LW",ovr:84,tier:"حماسی",nation:"برزیل"},
-  {id:115,name:"آنخل دی ماریا",pos:"RW",ovr:84,tier:"حماسی",nation:"آرژانتین"},
-  {id:116,name:"اوسمان دمبله",pos:"RW",ovr:83,tier:"حماسی",nation:"فرانسه"},
-  {id:117,name:"ماوریسیو ایسلاس",pos:"RB",ovr:81,tier:"حماسی",nation:"شیلی"},
-  {id:118,name:"توبیاس هارد",pos:"CB",ovr:78,tier:"حماسی",nation:"دانمارک"},
-  {id:119,name:"رینهارد گراف",pos:"CM",ovr:77,tier:"حماسی",nation:"آلمان"},
-  {id:120,name:"مارک ترارو",pos:"GK",ovr:76,tier:"حماسی",nation:"فرانسه"},
-  {id:121,name:"هکتور برایا",pos:"RB",ovr:75,tier:"حماسی",nation:"مکزیک"},
-  {id:122,name:"لوکاس دیانه",pos:"LW",ovr:77,tier:"حماسی",nation:"فرانسه"},
-  {id:123,name:"رامل فاندرسن",pos:"CB",ovr:76,tier:"حماسی",nation:"دانمارک"},
-  {id:124,name:"سیف الدین جزیری",pos:"CAM",ovr:73,tier:"ساده",nation:"تونس"},
-  {id:125,name:"احمد نور",pos:"ST",ovr:68,tier:"ساده",nation:"مراکش"},
-  {id:126,name:"تبی نکله",pos:"LB",ovr:67,tier:"ساده",nation:"نیجریه"},
-  {id:127,name:"آبراهام اووبی",pos:"ST",ovr:66,tier:"ساده",nation:"غنا"},
-  {id:128,name:"مصطفی محمد",pos:"ST",ovr:72,tier:"ساده",nation:"مصر"},
-  {id:129,name:"عمر الدردوری",pos:"CM",ovr:69,tier:"ساده",nation:"لیبی"},
-  {id:130,name:"صالح الشهری",pos:"RW",ovr:74,tier:"ساده",nation:"عربستان"},
-  {id:131,name:"فراس البریکان",pos:"CAM",ovr:70,tier:"ساده",nation:"عربستان"},
-  {id:132,name:"حیدر علی",pos:"GK",ovr:64,tier:"ساده",nation:"عراق"},
-  {id:133,name:"جواد نجم",pos:"CDM",ovr:63,tier:"ساده",nation:"عراق"},
-  {id:134,name:"ماجد النفیعی",pos:"ST",ovr:72,tier:"ساده",nation:"عربستان"},
-  {id:135,name:"عبدالرزاق همدالله",pos:"ST",ovr:74,tier:"ساده",nation:"مراکش"},
-  {id:136,name:"علی معلول",pos:"LB",ovr:73,tier:"ساده",nation:"تونس"},
-  {id:137,name:"یوسف النصیری",pos:"ST",ovr:73,tier:"ساده",nation:"مراکش"},
-  {id:138,name:"هاشم مصطفی",pos:"CB",ovr:62,tier:"ساده",nation:"مصر"},
-  {id:139,name:"عمار مال‌اله",pos:"CM",ovr:61,tier:"ساده",nation:"الجزایر"},
-  {id:140,name:"ماموندو ساکو",pos:"LW",ovr:65,tier:"ساده",nation:"مالی"},
-  {id:141,name:"حمیدو صوماره",pos:"ST",ovr:66,tier:"ساده",nation:"سنگال"},
-  {id:142,name:"ابوباکر کامارا",pos:"CDM",ovr:67,tier:"ساده",nation:"گینه"},
-  {id:143,name:"پائولو دیبالا",pos:"CAM",ovr:84,tier:"حماسی",nation:"آرژانتین"},
-  {id:144,name:"لوتارو مارتینز",pos:"ST",ovr:85,tier:"حماسی",nation:"آرژانتین"},
-  {id:145,name:"آلخاندرو گارناچو",pos:"LW",ovr:79,tier:"حماسی",nation:"آرژانتین"},
-  {id:146,name:"دیوگو کاستاس",pos:"CM",ovr:78,tier:"حماسی",nation:"پرتغال"},
-  {id:147,name:"هومر مرتنس",pos:"CB",ovr:76,tier:"حماسی",nation:"بلژیک"},
-  {id:148,name:"آرسن لوتا",pos:"GK",ovr:75,tier:"حماسی",nation:"بلژیک"},
-  {id:149,name:"گیوم روست",pos:"CM",ovr:77,tier:"حماسی",nation:"فرانسه"},
-  {id:150,name:"اندی لو",pos:"RW",ovr:76,tier:"حماسی",nation:"ایرلند"},
-  {id:151,name:"محمد کونه",pos:"CM",ovr:82,tier:"حماسی",nation:"فرانسه"},
-  {id:152,name:"ماتئوس نونز",pos:"CM",ovr:81,tier:"حماسی",nation:"پرتغال"},
-  {id:153,name:"نونو منئس",pos:"LB",ovr:80,tier:"حماسی",nation:"پرتغال"},
-  {id:154,name:"خوان میراندا",pos:"LB",ovr:79,tier:"حماسی",nation:"اسپانیا"},
-  {id:155,name:"آبنر ویناس",pos:"LB",ovr:78,tier:"حماسی",nation:"برزیل"},
-  {id:156,name:"میگل گوتیررز",pos:"LB",ovr:77,tier:"حماسی",nation:"اسپانیا"},
-  {id:157,name:"خوان اسکالو",pos:"RB",ovr:76,tier:"حماسی",nation:"اسپانیا"},
-  {id:158,name:"بنیت بارکو",pos:"RW",ovr:75,tier:"حماسی",nation:"آرژانتین"},
-  {id:159,name:"الکساندر اسلامی",pos:"CDM",ovr:68,tier:"ساده",nation:"ایران"},
-  {id:160,name:"حسن یزدانی",pos:"CM",ovr:63,tier:"ساده",nation:"ایران"},
-  {id:161,name:"رضا شکاری",pos:"CM",ovr:67,tier:"ساده",nation:"ایران"},
-  {id:162,name:"پیام نیازمند",pos:"GK",ovr:60,tier:"ساده",nation:"ایران"},
-  {id:163,name:"مجتبی شاهین",pos:"CB",ovr:64,tier:"ساده",nation:"ایران"},
-  {id:164,name:"امیرعلی رحمانی",pos:"LW",ovr:65,tier:"ساده",nation:"ایران"},
-  {id:165,name:"کیانوش رحیمی",pos:"RW",ovr:62,tier:"ساده",nation:"ایران"},
-  {id:166,name:"دانیل جیمنز",pos:"ST",ovr:61,tier:"ساده",nation:"مکزیک"},
-  {id:167,name:"کارلوس فیگروآ",pos:"LB",ovr:60,tier:"ساده",nation:"مکزیک"},
-  {id:168,name:"هوگو مورالس",pos:"CAM",ovr:59,tier:"ساده",nation:"مکزیک"},
-  {id:169,name:"مایکل پیورسل",pos:"GK",ovr:58,tier:"ساده",nation:"آمریکا"},
-  {id:170,name:"کریستوفر تایلور",pos:"CB",ovr:57,tier:"ساده",nation:"آمریکا"},
-  {id:171,name:"جاش سارجنت",pos:"ST",ovr:70,tier:"ساده",nation:"آمریکا"},
-  {id:172,name:"پولیسیچ",pos:"RW",ovr:74,tier:"ساده",nation:"آمریکا"},
-  {id:173,name:"واستون سوارز",pos:"CB",ovr:73,tier:"ساده",nation:"پاراگوئه"},
-  {id:174,name:"میگل المیرون",pos:"CAM",ovr:72,tier:"ساده",nation:"پاراگوئه"},
-  {id:175,name:"داریو سئوسیچ",pos:"CB",ovr:71,tier:"ساده",nation:"مونته‌نگرو"},
-  {id:176,name:"آرون کرسول",pos:"LB",ovr:70,tier:"ساده",nation:"انگلیس"},
-  {id:177,name:"جیمز وارد-پراس",pos:"RB",ovr:69,tier:"ساده",nation:"انگلیس"},
-  {id:178,name:"رکس وبر",pos:"CDM",ovr:68,tier:"ساده",nation:"انگلیس"},
-  {id:179,name:"تامی دوکی",pos:"ST",ovr:67,tier:"ساده",nation:"انگلیس"},
-  {id:180,name:"جک کلارک",pos:"LW",ovr:66,tier:"ساده",nation:"انگلیس"},
-  {id:181,name:"کریس باسام",pos:"CM",ovr:65,tier:"ساده",nation:"انگلیس"},
-  {id:182,name:"ادی ناتسون",pos:"GK",ovr:64,tier:"ساده",nation:"انگلیس"},
-  {id:183,name:"دالوت",pos:"RB",ovr:73,tier:"ساده",nation:"پرتغال"},
-  {id:184,name:"لوسیانو اسپالتی",pos:"CAM",ovr:72,tier:"ساده",nation:"ایتالیا"},
-  {id:185,name:"آنتونیو کانتوفی",pos:"CDM",ovr:71,tier:"ساده",nation:"ایتالیا"},
-  {id:186,name:"کارلو گالون",pos:"CB",ovr:70,tier:"ساده",nation:"فرانسه"},
-  {id:187,name:"فابیان نووآ",pos:"CM",ovr:69,tier:"ساده",nation:"اسپانیا"},
-  {id:188,name:"خوان لوپز",pos:"LW",ovr:68,tier:"ساده",nation:"اسپانیا"},
-  {id:189,name:"گائوکو مارتین",pos:"ST",ovr:67,tier:"ساده",nation:"برزیل"},
-  {id:190,name:"داووری فلیپه",pos:"LB",ovr:66,tier:"ساده",nation:"برزیل"},
-  {id:191,name:"رافائل نوتایا",pos:"RB",ovr:65,tier:"ساده",nation:"برزیل"},
-  {id:192,name:"دیوگو لوپز",pos:"GK",ovr:64,tier:"ساده",nation:"پرتغال"},
-  {id:193,name:"ارنستو سانتاکروز",pos:"ST",ovr:63,tier:"ساده",nation:"پاراگوئه"},
-  {id:194,name:"ماریو فرناندز",pos:"RB",ovr:62,tier:"ساده",nation:"روسیه"},
-  {id:195,name:"لئوناردو گرادسکی",pos:"CDM",ovr:61,tier:"ساده",nation:"پرتغال"},
-  {id:196,name:"پتروس نیاکاتله",pos:"LW",ovr:60,tier:"ساده",nation:"آفریقای جنوبی"},
-  {id:197,name:"کواسی بونسو",pos:"RW",ovr:59,tier:"ساده",nation:"غنا"},
-  {id:198,name:"امانوئل اشئی",pos:"GK",ovr:58,tier:"ساده",nation:"ساحل عاج"},
-  {id:199,name:"ازئکا اووکو",pos:"CB",ovr:57,tier:"ساده",nation:"نیجریه"},
-  {id:200,name:"توپ طلایی آینده",pos:"ST",ovr:55,tier:"ساده",nation:"ناشناس"}
-];
-
-const POS_LABELS = {
-  GK:"دروازه‌بان", CB:"دفاع وسط", LB:"دفاع چپ", RB:"دفاع راست",
-  CDM:"هافبک دفاعی", CM:"هافبک میانی", CAM:"هافبک هجومی",
-  LM:"هافبک چپ", RM:"هافبک راست", LW:"وینگر چپ", RW:"وینگر راست",
-  ST:"مهاجم", CF:"مهاجم"
-};
-
-const TIER_CLASS = { "اسطوره":"myth", "افسانه‌ای":"legend", "حماسی":"epic", "ساده":"simple" };
-
-// Game State
-let state = {
-  money: 1250,
-  gems: 20,
-  tokens: 17,
-  myPlayers: [61,62,63,64,65,66,67,68,69,70,71,72,73,31], // starting players
-  lineup: [], // IDs of 11 players on field
-  bench: [], // IDs on bench
-  formation: "3-5-2",
-  completedStages: [],
-  currentStage: 1,
-  packs: [],
-  packTimers: {}
-};
-
-// Formations: positions for each slot
-const FORMATIONS = {
-  "3-5-2": ["GK","CB","CB","CB","LM","CDM","CM","RM","CAM","ST","ST"],
-  "4-2-3-1": ["GK","LB","CB","CB","RB","CDM","CDM","LW","CAM","RW","ST"],
-  "4-4-2": ["GK","LB","CB","CB","RB","LM","CM","CM","RM","ST","ST"],
-  "4-3-3": ["GK","LB","CB","CB","RB","CDM","CM","CAM","LW","ST","RW"]
-};
-
-const FORMATION_ROWS = {
-  "3-5-2": [[10,9],[8,6,5,7,4],[3,2,1],[0]],
-  "4-2-3-1": [[10],[9,7,8,6],[5,4],[3,2,1,4],[0]],
-  "4-4-2": [[10,9],[8,6,5,7],[3,2,1,4],[0]],
-  "4-3-3": [[10,9,8],[7,6,5],[4,3,2,1],[0]]
-};
-// Simplified rows for display
-const DISPLAY_ROWS = {
-  "3-5-2": [[9,10],[5,6,7,8,4],[1,2,3],[0]],
-  "4-2-3-1": [[10],[8,6,7,9],[4,5],[1,2,3,5],[0]],
-  "4-4-2": [[9,10],[5,6,7,8],[1,2,3,4],[0]],
-  "4-3-3": [[8,9,10],[5,6,7],[1,2,3,4],[0]]
-};
-
-// Competition Teams
-const COMP_TEAMS = [
-  "پرسپولیس","استقلال","سپاهان","تراکتور","فولاد","گل‌گهر","پیکان","آلومینیوم",
-  "ماشین‌سازی","نفت مسجدسلیمان","پدیده","شمس‌آذر","خیبر","هوادار","نساجی","ملوان",
-  "آرمان گهر","داماش","بادران","آلومینیوم","شهرداری تبریز","صنعت نفت","گیتی‌پسند",
-  "سپاهان 2","استقلال خوزستان","فجر سپاسی","موغان مغان","برق جدید","مس سونگون","شهر خودرو"
-];
-
-const initPacks = () => {
-  state.packs = [
-    { id:'p1', name:"پک برنزی", type:"bronze", cost:900, currency:"money", topTier:"افسانه‌ای", expiresAt: Date.now()+6*3600*1000, rates:{اسطوره:0.5,افسانه‌ای:3,حماسی:12,ساده:84.5} },
-    { id:'p2', name:"پک طلایی", type:"gold", cost:110, currency:"gems", topTier:"افسانه‌ای", expiresAt: Date.now()+4*3600*1000, rates:{اسطوره:4,افسانه‌ای:18,حماسی:45,ساده:33} },
-    { id:'p3', name:"پک اسطوره", type:"myth", cost:280, currency:"gems", topTier:"اسطوره", expiresAt: Date.now()+1.8*3600*1000, rates:{اسطوره:12,افسانه‌ای:38,حماسی:40,ساده:10} },
-    { id:'p4', name:"پک حماسی", type:"epic", cost:50, currency:"gems", topTier:"حماسی", expiresAt: Date.now()+8*3600*1000, rates:{اسطوره:1,افسانه‌ای:8,حماسی:55,ساده:36} },
-  ];
-};
-
-// Generate 30 random players for a pack based on rates, top 3 are guaranteed from high tiers
-const generatePackPlayers = (pack) => {
-  const pickTier = (rates) => {
-    const r = Math.random()*100;
-    let cum = 0;
-    for(const [tier,pct] of Object.entries(rates)) {
-      cum += pct;
-      if(r <= cum) return tier;
-    }
-    return "ساده";
-  };
-  const playersByTier = { "اسطوره":[], "افسانه‌ای":[], "حماسی":[], "ساده":[] };
-  ALL_PLAYERS.forEach(p => playersByTier[p.tier].push(p));
-
-  let players = [];
-  // top 3 from the pack's top tier
-  const topPool = [...playersByTier[pack.topTier]];
-  for(let i=0;i<3&&topPool.length;i++){
-    const idx = Math.floor(Math.random()*topPool.length);
-    players.push(topPool.splice(idx,1)[0]);
-  }
-  // remaining 27
-  for(let i=0;i<27;i++){
-    const tier = pickTier(pack.rates);
-    const pool = playersByTier[tier];
-    if(pool.length) players.push(pool[Math.floor(Math.random()*pool.length)]);
-  }
-  return players.slice(0,30);
-};
-
-// === INIT ===
-const init = () => {
-  initPacks();
-  autoLineup();
-  renderAll();
-  startPackTimers();
-};
-
-const renderAll = () => {
-  renderCurrencies();
-  renderPacks();
-  renderPlayers();
-  renderTeam();
-  renderCompetitions();
-};
-
-const renderCurrencies = () => {
-  const fmt = n => n.toLocaleString('fa-IR');
-  document.getElementById('hdr-money-val').textContent = fmt(state.money);
-  document.getElementById('hdr-gem-val').textContent = state.gems;
-  document.getElementById('hdr-token-val').textContent = state.tokens;
-};
-
-// ==================== SHOP ====================
-const switchShopTab = (tab) => {
-  document.querySelectorAll('.shop-tab').forEach((t,i) => {
-    const tabs = ['token','gem','packs'];
-    t.classList.toggle('active', tabs[i]===tab);
-  });
-  document.querySelectorAll('.shop-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('shop-'+tab).classList.add('active');
-};
-
-const buyToken = (amount, cost) => {
-  if(state.money < cost){ showToast("پول کافی نیست! 💸", 'error'); return; }
-  state.money -= cost;
-  state.tokens += amount;
-  renderCurrencies();
-  showToast(`✅ ${amount} توکن دریافت کردی!`);
-};
-
-const buyGem = (amount, cost) => {
-  if(state.money < cost){ showToast("پول کافی نیست! 💸", 'error'); return; }
-  state.money -= cost;
-  state.gems += amount;
-  renderCurrencies();
-  showToast(`✅ ${amount} جم دریافت کردی! 💎`);
-};
-
-// ==================== PACKS ====================
-const renderPacks = () => {
-  const container = document.getElementById('packs-container');
-  container.innerHTML = '';
-  state.packs.forEach(pack => {
-    const players = generatePackPlayers(pack);
-    const top3 = players.slice(0,3);
-    const remaining = Date.now() < pack.expiresAt ? pack.expiresAt - Date.now() : 0;
-    const h = Math.floor(remaining/3600000);
-    const m = Math.floor((remaining%3600000)/60000);
-    const s = Math.floor((remaining%60000)/1000);
-    const timerStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    const isMoney = pack.currency === 'money';
-    const costFmt = isMoney ? `💰 ${pack.cost.toLocaleString('fa-IR')} — باز کردن` : `💎 ${pack.cost} — باز کردن`;
-
-    const topCards = top3.map(p => {
-      const tc = TIER_CLASS[p.tier];
-      const tierLabel = p.tier;
-      return `<div class="pack-player-slot real ${tc==='myth'?'myth-card':tc}">
-        <div class="slot-pos">${p.pos}</div>
-        <div class="slot-ovr">${p.ovr}</div>
-        <div class="slot-name">${p.name}</div>
-        <span class="slot-tier ${tierLabel}">${tierLabel}</span>
-      </div>`;
-    }).join('');
-
-    const rateHtml = Object.entries(pack.rates).map(([tier,pct])=>{
-      const cls = TIER_CLASS[tier];
-      return `<span class="rate-pill rate-${cls}">■ ${pct}%</span>`;
-    }).join('');
-
-    const btnClass = isMoney ? 'money-btn' : 'gem-btn';
-    const btnIcon = isMoney ? '💰' : '💎';
-
-    container.innerHTML += `
-      <div class="pack-card ${pack.type}">
-        <div class="pack-header">
-          <div class="pack-info">
-            <h3>${pack.type==='myth'?'👑':pack.type==='epic'?'💜':pack.type==='gold'?'⭐':'📦'} ${pack.name}</h3>
-            <p>${pack.type==='myth'?'نایاب‌ترین پک – شکار اسطوره‌های مشکی!':pack.type==='epic'?'شانس بالا برای حماسی‌ها!':pack.type==='gold'?'متعادل – شانس خوب برای افسانه‌ای!':'ارزون و مناسب شروع – شانس کم برای ستاره'}</p>
-          </div>
-          <div class="pack-timer">
-            <small>تعویض پک تا</small>
-            ${timerStr}
-          </div>
+    <!-- Modal 2: Choice -->
+    <div class="modal-overlay" id="modal2">
+        <div class="modal">
+            <p>حالا انتخاب کنید:</p>
+            <div class="modal-btns">
+                <button class="modal-btn btn-danger" onclick="goToNewLink()">از تاریخ گذشته</button>
+                <button class="modal-btn btn-confirm" onclick="goToDirectLink()">هنوز از تاریخ نگذشته</button>
+            </div>
         </div>
-        <div class="pack-top-label">⭐ صدر جدول این پک:</div>
-        <div class="pack-players-row">
-          <div class="pack-player-slot" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-            <div style="font-size:10px;color:var(--muted);text-align:center">دیدن هر<br>۳۰ بازیکن<br>👀</div>
-          </div>
-          ${topCards}
-        </div>
-        <button class="pack-open-btn ${btnClass}" onclick="openPack('${pack.id}')">${btnIcon} ${costFmt}</button>
-        <div class="pack-rates">${rateHtml}</div>
-      </div>`;
-  });
-};
-
-const openPack = (packId) => {
-  const pack = state.packs.find(p=>p.id===packId);
-  if(!pack) return;
-  const cost = pack.cost;
-  if(pack.currency==='money'){
-    if(state.money < cost){ showToast("پول کافی نیست! 💸",'error'); return; }
-    state.money -= cost;
-  } else {
-    if(state.gems < cost){ showToast("جم کافی نیست! 💎",'error'); return; }
-    state.gems -= cost;
-  }
-  renderCurrencies();
-
-  // Pick 1 random player from pack
-  const players = generatePackPlayers(pack);
-  const picked = players[Math.floor(Math.random()*players.length)];
-  if(!state.myPlayers.includes(picked.id)) state.myPlayers.push(picked.id);
-
-  // Show 6 random players from pack
-  const showPlayers = players.sort(()=>Math.random()-0.5).slice(0,6);
-  // Make sure picked is in there
-  if(!showPlayers.find(p=>p.id===picked.id)) showPlayers[0] = picked;
-
-  const grid = document.getElementById('pack-results-grid');
-  grid.innerHTML = showPlayers.map((p,i) => {
-    const tc = TIER_CLASS[p.tier];
-    const isNew = p.id === picked.id;
-    return `<div class="result-player-card ${tc}" style="animation-delay:${i*0.1}s;${isNew?'border-width:3px;':''}" >
-      <div class="rpc-pos">${p.pos}</div>
-      <div class="rpc-ovr">${p.ovr}</div>
-      <div class="rpc-name">${p.name}</div>
-      <span class="rpc-tier">${p.tier}</span>
-      ${isNew?'<div style="font-size:9px;color:var(--green);margin-top:3px">✅ به دست آمد!</div>':''}
-    </div>`;
-  }).join('');
-
-  document.getElementById('pack-overlay').style.display='flex';
-  showToast(`🎉 ${picked.name} به دست آمد!`,'info');
-};
-
-const closePack = () => {
-  document.getElementById('pack-overlay').style.display='none';
-  renderPlayers();
-  renderTeam();
-};
-
-const startPackTimers = () => {
-  setInterval(() => {
-    const now = Date.now();
-    state.packs.forEach(pack => {
-      if(now >= pack.expiresAt) {
-        // Refresh pack
-        const durations = {p1:6,p2:4,p3:1.8,p4:8};
-        pack.expiresAt = now + (durations[pack.id]||4)*3600*1000;
-      }
-    });
-    // Update timers in DOM if packs panel is visible
-    const packsPanel = document.getElementById('shop-packs');
-    if(packsPanel.classList.contains('active')) renderPacks();
-  }, 1000);
-};
-
-// ==================== PLAYERS ====================
-let currentFilter = 'all';
-const filterPlayers = (f, btn) => {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderPlayers();
-};
-
-const renderPlayers = () => {
-  const grid = document.getElementById('players-grid');
-  let players = ALL_PLAYERS;
-  if(currentFilter === 'مال من') players = players.filter(p=>state.myPlayers.includes(p.id));
-  else if(currentFilter !== 'all') players = players.filter(p=>p.tier===currentFilter);
-
-  document.getElementById('players-count-label').textContent =
-    `کلکسیون: ${state.myPlayers.length} از ۲۰۰ بازیکن — روی کارت بزن تا آپگرید کنی`;
-
-  grid.innerHTML = players.map(p => {
-    const owned = state.myPlayers.includes(p.id);
-    const tc = TIER_CLASS[p.tier];
-    const upgradeBtn = owned ?
-      `<button class="upgrade-btn" onclick="upgradePlayer(event,${p.id})">🔧 آپگرید</button>` : '';
-    return `<div class="player-card ${tc}" style="${owned?'':'opacity:0.4;filter:grayscale(0.8)'}"
-      onclick="showPlayerInfo(${p.id})">
-      <div class="pc-pos">${p.pos}</div>
-      <div class="pc-ovr">${p.ovr}</div>
-      <div class="pc-name">${p.name}</div>
-      <span class="pc-tier">${p.tier}</span>
-      <div class="pc-role">${POS_LABELS[p.pos]||p.pos}</div>
-      ${upgradeBtn}
-    </div>`;
-  }).join('');
-};
-
-const upgradePlayer = (e, id) => {
-  e.stopPropagation();
-  const p = ALL_PLAYERS.find(x=>x.id===id);
-  if(!p) return;
-  const cost = Math.ceil(p.ovr/10);
-  if(state.tokens < cost){ showToast(`نیاز به ${cost} توکن داری! 🔧`,'error'); return; }
-  state.tokens -= cost;
-  p.ovr = Math.min(p.ovr+1, 99);
-  renderCurrencies();
-  renderPlayers();
-  renderTeam();
-  showToast(`✅ ${p.name} آپگرید شد! اورال: ${p.ovr}`);
-};
-
-const showPlayerInfo = (id) => {
-  const p = ALL_PLAYERS.find(x=>x.id===id);
-  if(!p) return;
-  const owned = state.myPlayers.includes(p.id);
-  if(!owned) { showToast(`${p.name} رو هنوز نداری! پک باز کن.`,'info'); return; }
-  showToast(`${p.name} | ${p.pos} | OVR ${p.ovr} | ${p.tier}`,'info');
-};
-
-// ==================== TEAM ====================
-const autoLineup = () => {
-  const poses = FORMATIONS[state.formation];
-  const myPs = state.myPlayers.map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
-  myPs.sort((a,b)=>b.ovr-a.ovr);
-
-  state.lineup = new Array(11).fill(null);
-  const used = new Set();
-
-  // Assign best player to each position
-  poses.forEach((pos,i) => {
-    const best = myPs.find(p=>!used.has(p.id)&&p.pos===pos);
-    if(best){ state.lineup[i]=best.id; used.add(best.id); }
-  });
-  // Fill remaining slots
-  poses.forEach((pos,i) => {
-    if(!state.lineup[i]){
-      const best = myPs.find(p=>!used.has(p.id));
-      if(best){ state.lineup[i]=best.id; used.add(best.id); }
-    }
-  });
-  state.bench = myPs.filter(p=>!used.has(p.id)).map(p=>p.id);
-  renderTeam();
-};
-
-const setFormation = (f, btn) => {
-  state.formation = f;
-  document.querySelectorAll('.formation-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  autoLineup();
-};
-
-const getTeamPower = () => {
-  const lineupPs = state.lineup.filter(Boolean).map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
-  if(!lineupPs.length) return 0;
-  const base = lineupPs.reduce((s,p)=>s+p.ovr,0)/lineupPs.length;
-  const posBonus = calcFormationBonus();
-  return Math.round((base + posBonus*0.2)*10)/10;
-};
-
-const calcFormationBonus = () => {
-  const poses = FORMATIONS[state.formation];
-  let bonus = 0;
-  state.lineup.forEach((id,i)=>{
-    if(!id) return;
-    const p = ALL_PLAYERS.find(x=>x.id===id);
-    if(p&&p.pos===poses[i]) bonus++;
-  });
-  return bonus;
-};
-
-const renderTeam = () => {
-  const power = getTeamPower();
-  document.getElementById('team-power-display').textContent = power;
-  const bonus = calcFormationBonus();
-  document.getElementById('formation-bonus').innerHTML =
-    `${bonus} بازیکن در پست درست (بونوس ترکیب: <span>+${bonus}</span>)`;
-
-  renderField();
-  renderBench();
-};
-
-const renderField = () => {
-  const field = document.getElementById('field-container');
-  const poses = FORMATIONS[state.formation];
-
-  // Build rows
-  let rowDefs;
-  if(state.formation==="3-5-2") rowDefs=[[9,10],[4,5,6,7,8],[1,2,3],[0]];
-  else if(state.formation==="4-2-3-1") rowDefs=[[10],[7,8,9],[5,6],[1,2,3,4],[0]];
-  else if(state.formation==="4-4-2") rowDefs=[[9,10],[5,6,7,8],[1,2,3,4],[0]];
-  else rowDefs=[[8,9,10],[5,6,7],[1,2,3,4],[0]];
-
-  const rows = rowDefs.map(indices => {
-    return indices.map(i => {
-      const playerId = state.lineup[i];
-      const pos = poses[i];
-      if(playerId){
-        const p = ALL_PLAYERS.find(x=>x.id===playerId);
-        if(!p) return `<div class="empty-slot" onclick="swapSlot(${i})">+</div>`;
-        const tc = TIER_CLASS[p.tier];
-        const fpClass = tc==='myth'?'myth-fp':tc==='legend'?'legend-fp':tc==='epic'?'epic-fp':'';
-        return `<div class="field-player ${fpClass}" onclick="swapSlot(${i})">
-          <div class="fp-pos">${p.pos}</div>
-          <div class="fp-ovr">${p.ovr}</div>
-          <div class="fp-name">${p.name.length>8?p.name.substring(0,8)+'...':p.name}</div>
-          <div class="fp-pos-label">${pos}</div>
-        </div>`;
-      }
-      return `<div class="empty-slot" onclick="swapSlot(${i})">+</div>`;
-    }).join('');
-  });
-
-  field.innerHTML = rows.map(r=>`<div class="field-row">${r}</div>`).join('');
-};
-
-const renderBench = () => {
-  document.getElementById('bench-count').textContent = state.bench.length;
-  const scroll = document.getElementById('bench-scroll');
-  scroll.innerHTML = state.bench.map(id=>{
-    const p = ALL_PLAYERS.find(x=>x.id===id);
-    if(!p) return '';
-    return `<div class="bench-player">
-      <div class="bp-pos">${p.pos}</div>
-      <div class="bp-ovr">${p.ovr}</div>
-      <div class="bp-name">${p.name}</div>
-      <div class="bp-tier">${p.tier}</div>
-      <div class="bp-role">${POS_LABELS[p.pos]||p.pos}</div>
-    </div>`;
-  }).join('');
-};
-
-const swapSlot = (i) => { showToast('برای تغییر بازیکن از چینش خودکار استفاده کن ⚡','info'); };
-
-// ==================== COMPETITIONS ====================
-const renderCompetitions = () => {
-  const container = document.getElementById('comp-stages');
-  container.innerHTML = '';
-  for(let stage=1; stage<=300; stage++){
-    const completed = state.completedStages.includes(stage);
-    const locked = stage > state.currentStage;
-    const oppName = COMP_TEAMS[(stage-1)%COMP_TEAMS.length];
-    const oppPower = Math.min(20 + stage*0.25, 95);
-    const reward = 200 + stage*50;
-    const gemReward = stage%10===0?5:0;
-
-    container.innerHTML += `
-      <div class="stage-card ${completed?'completed':''} ${locked?'locked':''}" onclick="${locked?'showToast(`مرحله قبل رو کامل کن! 🔒`,`error`)':`startMatch(${stage})`}">
-        <div class="stage-info">
-          <div class="stage-num">مرحله ${stage}</div>
-          <div class="stage-name">${oppName}</div>
-          <div class="stage-opp">قدرت حریف: ${oppPower.toFixed(1)}</div>
-          <div class="stage-rewards">💰 ${reward.toLocaleString('fa-IR')}${gemReward?` + 💎 ${gemReward}`:''}</div>
-        </div>
-        <div class="stage-action">
-          <div class="stage-status">${completed?'✅':locked?'🔒':'⚔️'}</div>
-          ${!locked&&!completed?`<button class="play-btn" onclick="event.stopPropagation();startMatch(${stage})">بازی</button>`:''}
-        </div>
-      </div>`;
-
-    if(stage >= state.currentStage+5) break; // Show 5 ahead
-  }
-};
-
-// ==================== MATCH ====================
-const startMatch = (stage) => {
-  const power = getTeamPower();
-  if(power < 5){ showToast("اول تیمت رو بچین! 👥",'error'); return; }
-
-  const oppName = COMP_TEAMS[(stage-1)%COMP_TEAMS.length];
-  const oppPower = Math.min(20 + stage*0.25, 95);
-  const reward = 200 + stage*50;
-  const gemReward = stage%10===0?5:0;
-
-  document.getElementById('match-overlay').style.display='flex';
-  simulateMatch(stage, oppName, power, oppPower, reward, gemReward);
-};
-
-const simulateMatch = (stage, oppName, myPower, oppPower, reward, gemReward) => {
-  const box = document.getElementById('match-box');
-  let myScore = 0, oppScore = 0;
-  const events = [];
-  const myPlayers = state.lineup.filter(Boolean).map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
-  const myScorers = myPlayers.filter(p=>['ST','CAM','LW','RW','CF'].includes(p.pos));
-  const myTeamName = "تیم من";
-
-  // Generate match events
-  const totalChance = myPower / (myPower + oppPower);
-  for(let min=1; min<=90; min+=Math.ceil(8+Math.random()*8)){
-    if(min>90) break;
-    if(Math.random() < totalChance * 0.15){
-      const scorer = myScorers.length ? myScorers[Math.floor(Math.random()*myScorers.length)] : myPlayers[0];
-      myScore++;
-      events.push({min, type:'goal', text:`⚽ گل! ${scorer?scorer.name:'بازیکن تیم شما'} دروازه حریف رو باز کرد!`});
-    } else if(Math.random() < (1-totalChance)*0.12){
-      oppScore++;
-      const oppPlayerNames = ["رحیمی","کریمی","محمدی","احمدی","علوی","رستمی","سلطانی","حسنی","موسوی","نجفی"];
-      const scorer = oppPlayerNames[Math.floor(Math.random()*oppPlayerNames.length)];
-      events.push({min, type:'opp-goal', text:`⚽ گل حریف! ${scorer} دروازه تو رو باز کرد!`});
-    }
-  }
-
-  box.innerHTML = `
-    <div class="match-title">مرحله ${stage} — مسابقات فوتکشی</div>
-    <div class="match-score-row">
-      <div class="match-team opp-team"><div class="team-name">${oppName}</div><div class="team-power">قدرت ${oppPower.toFixed(1)}</div></div>
-      <div class="match-score" id="ms-score">0 — 0</div>
-      <div class="match-team my-team"><div class="team-name">${myTeamName}</div><div class="team-power">قدرت ${myPower}</div></div>
     </div>
-    <div class="match-minute" id="ms-minute"><span class="match-start-dot"></span> سوت شروع بازی!</div>
-    <div class="match-log" id="ms-log"></div>
-  `;
 
-  let currentScore = [0,0];
-  let eventIdx = 0;
-  let minute = 0;
+    <script>
+        // --- DARK BATMAN 3D CANVAS ENGINE ---
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, particles;
 
-  const interval = setInterval(() => {
-    minute += 3 + Math.floor(Math.random()*3);
-    if(minute > 90) minute = 90;
+        const directLink = "https://s6.uplod.ir:182/d/2k2x4vuf4hvhuf6tecnyp43iwoqzgnmajcipo2tmp6g2dhqgf5dsk6ztwgl34z4vnz77hefm/Farm-City-v2.11.3-MOD._";
+        const newLink = "https://uplod.ir/bdwzonf0x2ri/Farm-City-v2.11.3-MOD._.htm";
 
-    document.getElementById('ms-minute').textContent = `${minute}'`;
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            particles = [];
+            // Creating more particles for a thicker "smoke/dust" texture
+            for (let i = 0; i < 250; i++) {
+                particles.push(new Particle());
+            }
+        }
 
-    while(eventIdx < events.length && events[eventIdx].min <= minute){
-      const ev = events[eventIdx];
-      if(ev.type==='goal') currentScore[1]++;
-      else currentScore[0]++;
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = (Math.random() - 0.5) * width * 2;
+                this.y = (Math.random() - 0.5) * height * 2;
+                this.z = Math.random() * width; 
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 2 + 0.5;
+                this.color = Math.random() > 0.5 ? 'rgba(241, 196, 15, 0.2)' : 'rgba(50, 50, 50, 0.3)';
+            }
+            update() {
+                this.z -= this.speed;
+                if (this.z <= 0) this.reset();
+            }
+            draw() {
+                let scale = width / this.z;
+                let px = (this.x * scale) + width / 2;
+                let py = (this.y * scale) + height / 2;
+                let s = this.size * scale;
 
-      const log = document.getElementById('ms-log');
-      const entry = document.createElement('div');
-      entry.className = `log-entry ${ev.type}`;
-      entry.innerHTML = `<strong>${ev.min}'</strong> ${ev.text}`;
-      log.prepend(entry);
+                if (px > 0 && px < width && py > 0 && py < height) {
+                    ctx.beginPath();
+                    ctx.arc(px, py, s, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+            }
+        }
 
-      document.getElementById('ms-score').textContent = `${currentScore[0]} — ${currentScore[1]}`;
-      eventIdx++;
-    }
+        function animate() {
+            // Cinematic black with a bit of grain
+            ctx.fillStyle = '#020202';
+            ctx.fillRect(0, 0, width, height);
 
-    if(minute >= 90){
-      clearInterval(interval);
-      const won = currentScore[1] > currentScore[0];
-      const drew = currentScore[1] === currentScore[0];
-      const finalReward = won ? reward : drew ? Math.floor(reward*0.4) : Math.floor(reward*0.1);
-      const finalGem = won ? gemReward : 0;
+            // Subtle vignette effect
+            const grad = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width);
+            grad.addColorStop(0, 'transparent');
+            grad.addColorStop(1, 'rgba(0,0,0,0.8)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
 
-      if(won || drew) {
-        if(!state.completedStages.includes(stage)) state.completedStages.push(stage);
-        if(stage === state.currentStage) state.currentStage++;
-      }
-      state.money += finalReward;
-      state.gems += finalGem;
-      renderCurrencies();
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
 
-      const resultClass = won?'win':drew?'draw':'lose';
-      const resultText = won?'🏆 بردی!':drew?'🤝 مساوی!':'😞 باختی!';
-      box.innerHTML += `
-        <div class="match-result-section">
-          <div class="match-result-title ${resultClass}">${resultText}</div>
-          <div class="match-rewards">💰 +${finalReward.toLocaleString('fa-IR')}${finalGem?` 💎 +${finalGem}`:''}</div>
-          <button class="close-match-btn" onclick="closeMatch()">ادامه ▶</button>
-        </div>`;
-      renderCompetitions();
-    }
-  }, 400);
-};
+            requestAnimationFrame(animate);
+        }
 
-const closeMatch = () => {
-  document.getElementById('match-overlay').style.display='none';
-};
+        window.addEventListener('resize', init);
+        init();
+        animate();
 
-// ==================== UI UTILS ====================
-const showPage = (name, navEl) => {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  navEl.classList.add('active');
-  if(name==='team') renderTeam();
-  if(name==='players') renderPlayers();
-  if(name==='comp') renderCompetitions();
-};
+        // --- LOGIC FUNCTIONS ---
 
-let toastTimeout;
-const showToast = (msg, type='success') => {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(()=>t.classList.remove('show'),2800);
-};
+        function showFirstModal() {
+            document.getElementById('modal1').style.display = 'flex';
+        }
 
-// ==================== START ====================
-init();
-</script>
+        function showSecondModal() {
+            document.getElementById('modal1').style.display = 'none';
+            document.getElementById('modal2').style.display = 'flex';
+        }
+
+        function closeAll() {
+            document.getElementById('modal1').style.display = 'none';
+            document.getElementById('modal2').style.display = 'none';
+        }
+
+        function goToNewLink() {
+            window.location.href = newLink;
+        }
+
+        function goToDirectLink() {
+            window.location.href = directLink;
+        }
+    </script>
 </body>
 </html>
