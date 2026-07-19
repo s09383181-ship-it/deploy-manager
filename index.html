@@ -539,12 +539,12 @@ async function gh(path, opts={}){
 async function deploy(name, html, existingId){
   const token = getTok();
   if(!token){
+    toast("ابتدا توکن وارد کن", "err");
     openOv("mToken");
-    setStatus("err", "⚠️ ابتدا توکن را وارد کن");
     return null;
   }
   if(!html.trim()){
-    setStatus("err", "⚠️ کد HTML خالی است");
+    toast("کد HTML خالی است", "err");
     return null;
   }
   
@@ -552,12 +552,24 @@ async function deploy(name, html, existingId){
   const path = `sites/${id}/index.html`;
   const b64 = btoa(unescape(encodeURIComponent(html)));
   
-  setStatus("load", '<div class="spin"></div><div style="flex:1"><b>مرحله ۱ از ۲:</b> در حال آپلود به GitHub...</div>');
+  // اگه ویرایش هست، باید SHA فایل موجود رو بگیریم
+  let existingSha = null;
+  if(existingId){
+    try{
+      const info = await gh(`/repos/${OWNER}/${REPO}/contents/${path}`);
+      existingSha = info.sha;
+    }catch(e){
+      // فایل وجود نداره، مثل ساخت جدید عمل می‌کنیم
+    }
+  }
   
   try{
+    const body = {message: (existingId?"edit ":"deploy ")+name, content: b64, branch: BRANCH};
+    if(existingSha) body.sha = existingSha;
+    
     await gh(`/repos/${OWNER}/${REPO}/contents/${path}`, {
       method: "PUT",
-      body: JSON.stringify({message: "deploy "+name, content: b64, branch: BRANCH})
+      body: JSON.stringify(body)
     });
     
     const url = `https://${OWNER}.github.io/${REPO}/sites/${id}/`;
@@ -581,17 +593,16 @@ async function deploy(name, html, existingId){
     renderList();
     
     if(ok){
-      setStatus("ok", "✅ لینک آماده استفاده است!");
+      toast("✅ لینک آماده است! " + url);
     } else {
-      setStatus("err", "⏰ آپلود شد. لینک تا ۱ دقیقه دیگر فعال می‌شود.");
+      toast("⏰ آپلود شد. ۱ دقیقه دیگه فعال میشه", "warn");
     }
-    showResult(url, proj.size);
-    return url;
+    return {url, proj};
   }catch(e){
     if(e.message.includes("Bad credentials") || e.message.includes("401")){
-      setStatus("err", "❌ توکن نامعتبر است");
+      toast("❌ توکن نامعتبر", "err");
     } else {
-      setStatus("err", "❌ "+e.message);
+      toast("❌ " + e.message, "err");
     }
     return null;
   }
@@ -728,14 +739,13 @@ async function saveEdit(){
   const name = $("editName").value.trim() || editing.name;
   const html = $("editHTML").value;
   closeOv("mEdit");
-  $("btnDeployText").textContent = "در حال آپدیت...";
-  $("btnDeploy").disabled = true;
-  await deploy(name, html, editing.id);
-  $("btnDeployText").textContent = "دیپلوی و دریافت لینک";
-  $("btnDeploy").disabled = false;
+  toast("در حال ویرایش...", "warn");
+  const result = await deploy(name, html, editing.id);
+  if(result){
+    renderList();
+    toast("✅ ویرایش شد!");
+  }
   editing = null;
-  renderList();
-  goTab("list");
 }
 
 function delEdit(){
@@ -780,7 +790,12 @@ function init(){
     $("result").style.display = "none";
     $("btnDeploy").disabled = true;
     $("btnDeployText").textContent = "در حال دیپلوی...";
-    await deploy(name || ("پروژه "+toFa(projs.length+1)), html, null);
+    const result = await deploy(name || ("پروژه "+toFa(projs.length+1)), html, null);
+    if(result){
+      showResult(result.url, result.proj.size);
+      $("pName").value = "";
+      $("htmlInput").value = "";
+    }
     $("btnDeploy").disabled = false;
     $("btnDeployText").textContent = "دیپلوی و دریافت لینک";
   });
