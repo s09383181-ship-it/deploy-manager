@@ -673,6 +673,8 @@ small{color:#64748b;display:block;margin-top:20px;font-size:12px}
       method: "PUT",
       body: JSON.stringify({message: "delete "+p.name, content: removedB64, sha: fileInfo.sha, branch: BRANCH})
     });
+    
+    // بلافاصله از لیست محلی حذف کن
     projs = projs.filter(x=>x.id!==id);
     saveProjs();
     renderList();
@@ -680,7 +682,21 @@ small{color:#64748b;display:block;margin-top:20px;font-size:12px}
       $("status").style.display = "none";
       $("result").style.display = "none";
     }
-    toast("✅ از GitHub و لیست حذف شد");
+    toast("✅ حذف شد - فایل «removed» جایگزین شد");
+    
+    // بعد ۳۰ ثانیه واقعاً از GitHub پاک کن (تا کش آپدیت بشه)
+    setTimeout(async () => {
+      try {
+        const info = await gh(`/repos/${OWNER}/${REPO}/contents/sites/${id}/index.html`);
+        await gh(`/repos/${OWNER}/${REPO}/contents/sites/${id}/index.html`, {
+          method: "DELETE",
+          body: JSON.stringify({message: "real delete "+p.name, sha: info.sha, branch: BRANCH})
+        });
+        console.log("✅ فایل واقعاً از GitHub حذف شد:", id);
+      } catch (e) {
+        console.log("⚠️ حذف نهایی:", e.message);
+      }
+    }, 30000);
   }catch(e){
     // اگه فایل قبلاً پاک شده (404) فقط از لیست حذف کن
     if(e.message.includes("404") || e.message.includes("Not Found")){
