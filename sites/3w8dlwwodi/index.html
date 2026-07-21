@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>چیت دریم لیگ ۲۰۲۶</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: #000;
+            color: #e0fff5;
+            overflow: hidden;
+            height: 100vh;
+        }
+        canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.9; }
+
+        .container {
+            position: relative; z-index: 10;
+            max-width: 520px; margin: 40px auto; padding: 20px;
+        }
+
+        .card {
+            background: rgba(8, 32, 28, 0.96);
+            border: 2px solid #00ccaa;
+            border-radius: 26px;
+            padding: 32px 26px;
+            box-shadow: 0 0 50px rgba(0, 220, 180, 0.4);
+        }
+
+        h1 { text-align: center; font-size: 27px; font-weight: 900; color: #7fffd4; margin-bottom: 24px; }
+
+        .step {
+            background: rgba(12, 38, 32, 0.95);
+            border: 2px solid #00ccaa;
+            border-radius: 22px;
+            padding: 26px 22px;
+            margin-bottom: 22px;
+        }
+
+        button {
+            width: 100%; padding: 16px;
+            background: linear-gradient(#00ddbb, #00aa99);
+            color: #001a15;
+            border: none; border-radius: 50px;
+            font-size: 16px; font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:disabled { background: #223; color: #888; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<div class="container">
+    <div class="card" id="mainCard">
+        <h1>چیت دریم لیگ ۲۰۲۶</h1>
+        <div id="stepContainer"></div>
+    </div>
+</div>
+
+<div class="popup" id="popup" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:100;">
+    <div style="background:rgba(10,35,30,0.98);border:2px solid #00ddbb;border-radius:24px;padding:32px 26px;max-width:380px;text-align:center;">
+        <h2 id="popupTitle" style="color:#7fffd4;margin-bottom:16px;"></h2>
+        <p id="popupText" style="line-height:1.7;"></p>
+        <button onclick="closePopup()" style="margin-top:22px;width:100%;padding:14px;background:#00ddbb;color:#001a15;border:none;border-radius:50px;font-weight:700;">باشه</button>
+    </div>
+</div>
+
+<script>
+    // Matrix Background
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی";
+    let drops = Array(Math.floor(canvas.width / 14)).fill(1);
+
+    function draw() {
+        ctx.fillStyle = "rgba(0,18,15,0.1)";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#00ffcc";
+        ctx.font = "15px monospace";
+        for (let i = 0; i < drops.length; i++) {
+            ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, drops[i]*14);
+            if (drops[i]*14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setInterval(draw, 45);
+
+    const steps = [
+        {id:1, title:"عضویت در کانال اصلی", link:"http://rubika.ir/ZODIAC_MAFIANIGHTS", time:15},
+        {id:2, title:"عضویت در گروه مرحله دوم", link:"https://rubika.ir/joing/+BAJABEJHD0VQUCAAWDFOJSHPLJIZUFTT", time:20},
+        {id:3, title:"عضویت در گروه مرحله سوم", link:"https://rubika.ir/joing/+BAJABJGAF0QODPDQGMSJXOGOYNGULQZV", time:16},
+        {id:4, title:"عضویت در صفحه بازی مود", link:"https://rubika.ir/@BAZI_MOD_ZODIAC", time:12}
+    ];
+
+    let currentStep = 0;
+    let isProcessing = false;
+
+    function showPopup(title, text) {
+        document.getElementById('popupTitle').innerHTML = title;
+        document.getElementById('popupText').innerHTML = text;
+        document.getElementById('popup').style.display = 'flex';
+    }
+
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+    }
+
+    function renderCurrentStep() {
+        const step = steps[currentStep];
+        document.getElementById('stepContainer').innerHTML = `
+            <div class="step">
+                <h3 style="margin-bottom:12px;color:#aaffee;">مرحله ${step.id} از ۴</h3>
+                <h4 style="margin-bottom:20px;font-size:19px;">${step.title}</h4>
+                <button id="mainBtn" onclick="startStage()">باز کردن لینک + شروع تایمر</button>
+                <div class="timer" id="timerDisplay">آماده شروع...</div>
+            </div>
+        `;
+    }
+
+    function startStage() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        const btn = document.getElementById('mainBtn');
+        btn.disabled = true;
+        btn.textContent = "در حال پردازش...";
+
+        const step = steps[currentStep];
+        window.open(step.link, "_blank");
+
+        let timeLeft = step.time;
+        const timerEl = document.getElementById('timerDisplay');
+        timerEl.textContent = `⏳ ${timeLeft} ثانیه`;
+
+        const interval = setInterval(() => {
+            timeLeft--;
+            timerEl.textContent = `⏳ ${timeLeft} ثانیه`;
+
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                timerEl.textContent = "✅ مرحله تکمیل شد";
+
+                setTimeout(() => {
+                    currentStep++;
+                    if (currentStep < steps.length) {
+                        renderCurrentStep();
+                    } else {
+                        finishAllStages();
+                    }
+                    isProcessing = false;
+                }, 1200);
+            }
+        }, 1000);
+    }
+
+    function finishAllStages() {
+        showPopup("عالی رفیق! 🎉", "تو مراحلو انجام دادی<br><br>لینک دانلود فعال شد!");
+
+        const container = document.getElementById('stepContainer');
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px 20px;border:2px solid #00ccaa;border-radius:22px;">
+                <h3 style="color:#7fffd4;margin-bottom:20px;">دانلود آماده است</h3>
+                <button onclick="downloadFile()" style="padding:18px 40px;background:#ffd700;color:#000;font-weight:700;font-size:18px;">🚀 دانلود چیت دریم لیگ ۲۰۲۶</button>
+            </div>
+        `;
+    }
+
+    function downloadFile() {
+        window.open('https://gameeroid.com/download-file/dream-league-soccer-2026-dl-1/', '_blank');
+    }
+
+    // Start
+    renderCurrentStep();
+</script>
+</body>
+</html>
